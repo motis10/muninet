@@ -46,14 +46,13 @@ def render_header(current_language=DEFAULT_LANGUAGE, on_language_change=None, se
         st.markdown('<div class="header-search-row">', unsafe_allow_html=True)
         search_col1, search_col2 = st.columns([4,1])
         with search_col1:
-            st.text_input(
+            # Use search_query parameter to control the input value for proper clearing
+            search_input = st.text_input(
                 t("common.search", current_language),
-                value=search_query,
-                key="header_search_input",
+                value=search_query if search_query else "",
+                key="header_search_input", 
                 placeholder=t("common.search", current_language),
-                help=t("common.search", current_language),
-                label_visibility="collapsed",
-                on_change=None  # Debounced: only search on button click
+                label_visibility="collapsed"
             )
         with search_col2:
             if st.button("🔍", key="search_btn"):

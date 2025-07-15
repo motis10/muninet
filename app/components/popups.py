@@ -26,15 +26,16 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-def show_data_collection_popup(on_save, on_cancel, lang="en"):
+def show_data_collection_popup(on_save, on_cancel, lang="he"):
     """Show popup for collecting user data."""
     st.markdown(f"### {t('common.save', lang)}")
+    st.markdown(f"<span style='color: red;'>* {t('common.one_time', lang)}</span>", unsafe_allow_html=True)
     with st.form("user_data_form", clear_on_submit=False):
         first_name = st.text_input(t("forms.first_name", lang), key="popup_first_name")
         last_name = st.text_input(t("forms.last_name", lang), key="popup_last_name")
-        user_id = st.text_input(t("forms.id", lang), key="popup_id")
         phone = st.text_input(t("forms.phone", lang), key="popup_phone")
         email = st.text_input(t("forms.email", lang), key="popup_email")
+        user_id = st.text_input(t("forms.id_optional", lang), key="popup_id")
         col1, col2 = st.columns(2)
         with col1:
             save_clicked = st.form_submit_button(t("common.save", lang))
@@ -42,7 +43,7 @@ def show_data_collection_popup(on_save, on_cancel, lang="en"):
             cancel_clicked = st.form_submit_button(t("common.cancel", lang))
         if save_clicked:
             from app.utils.models import UserData
-            user = UserData(first_name, last_name, user_id, phone, email)
+            user = UserData(first_name, last_name, phone, user_id, email)
             result = validate_user_data(user)
             if result.is_valid:
                 on_save(user)
@@ -52,19 +53,19 @@ def show_data_collection_popup(on_save, on_cancel, lang="en"):
         if cancel_clicked:
             on_cancel()
 
-def show_success_popup(ticket_number, on_restart, lang="en"):
+def show_success_popup(ticket_number, on_restart, lang="he"):
     """Show success popup with ticket number."""
     st.success(t("messages.success_message", lang, ticket_number=ticket_number))
     if st.button(t("common.start_over", lang), key="success_restart"):
         on_restart()
 
-def show_error_popup(on_restart, lang="en"):
+def show_error_popup(on_restart, lang="he"):
     """Show error popup."""
     st.error(t("messages.error_message", lang))
     if st.button(t("common.try_again", lang), key="error_restart"):
         on_restart()
 
-def show_generic_popup(message, on_close=None, success=True, lang="en"):
+def show_generic_popup(message, on_close=None, success=True, lang="he"):
     """Show a generic popup for any error or success scenario."""
     if success:
         st.success(message)

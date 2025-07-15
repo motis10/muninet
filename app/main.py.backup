@@ -29,7 +29,7 @@ def init_session_state():
     if "ticket_history" not in st.session_state:
         st.session_state.ticket_history = storage.get_ticket_history()
     if "current_language" not in st.session_state:
-        st.session_state.current_language = "he"
+        st.session_state.current_language = "en"
     if "search_query" not in st.session_state:
         st.session_state.search_query = ""
     if "categories_data" not in st.session_state:
@@ -65,21 +65,16 @@ def main():
         st.rerun()
 
     def on_search():
-        # This function is called when search input changes
-        pass  # Real-time search is handled below
+        # Debounced: only update search_query when search button is pressed
+        st.session_state.search_query = st.session_state.get("header_search_input", "")
+        st.rerun()
 
     render_header(
         current_language=lang,
         on_language_change=on_language_change,
-        search_query=st.session_state.search_query,  # Pass current search query for proper clearing
+        search_query=st.session_state.search_query,
         on_search=on_search
     )
-
-    # Real-time search: Check if search input has changed and update immediately
-    current_search_input = st.session_state.get("header_search_input", "")
-    if current_search_input != st.session_state.search_query:
-        st.session_state.search_query = current_search_input
-        st.rerun()
 
     categories = st.session_state.categories_data or []
     streets = st.session_state.streets_data or []
@@ -89,17 +84,12 @@ def main():
             st.warning("No categories found in Supabase.")
         def on_category_click(category):
             st.session_state.selected_category = category
-            # Clear custom text when switching categories (will be regenerated in summary)
-            st.session_state.custom_text = ""
             if not st.session_state.user_data:
                 st.session_state.show_popup = True
                 st.rerun()
             else:
                 st.session_state.current_page = "streets"
                 st.session_state.search_query = ""
-                # Clear the search input when changing pages
-                if "header_search_input" in st.session_state:
-                    del st.session_state["header_search_input"]
                 st.rerun()
         if st.session_state.show_popup:
             def save_user(user):
@@ -108,20 +98,14 @@ def main():
                 st.session_state.show_popup = False
                 st.session_state.current_page = "streets"
                 st.session_state.search_query = ""
-                # Clear popup form keys and search input
-                for k in ["popup_first_name", "popup_last_name", "popup_id", "popup_phone", "popup_email", "header_search_input", "custom_text"]:
+                # Clear popup form keys
+                for k in ["popup_first_name", "popup_last_name", "popup_id", "popup_phone", "popup_email"]:
                     if k in st.session_state:
                         del st.session_state[k]
                 st.rerun()
             def cancel_user():
                 st.session_state.show_popup = False
                 st.session_state.selected_category = None
-                st.session_state.custom_text = ""
-                st.session_state.search_query = ""
-                if "header_search_input" in st.session_state:
-                    del st.session_state["header_search_input"]
-                st.session_state.current_page = "categories"
-                st.rerun()
             show_data_collection_popup(save_user, cancel_user, lang=lang)
         else:
             create_grid_view(categories, on_category_click, search_query=st.session_state.search_query, search_fn=supabase.search_categories)
@@ -131,66 +115,33 @@ def main():
         def on_street_click(street):
             st.session_state.selected_street = street
             st.session_state.current_page = "summary"
-            # Clear search when moving to summary
-            st.session_state.search_query = ""
-            if "header_search_input" in st.session_state:
-                del st.session_state["header_search_input"]
             st.rerun()  # <-- This line is necessary for immediate navigation
         create_grid_view(streets, on_street_click, search_query=st.session_state.search_query, search_fn=supabase.search_street_numbers)
     elif st.session_state.current_page == "summary":
         user = st.session_state.user_data
         category = st.session_state.selected_category
         street = st.session_state.selected_street
-        
-        # Validate that all required data is present
-        if not user or not category or not street:
-            st.error("Missing required data. Redirecting to categories...")
-            st.session_state.current_page = "categories"
-            st.session_state.selected_category = None
-            st.session_state.selected_street = None
-            st.rerun()
-            return
-            
         st.markdown(f"**{t('forms.first_name', lang)}:** {user.first_name}")
         st.markdown(f"**{t('forms.last_name', lang)}:** {user.last_name}")
+        st.markdown(f"**{t('forms.id', lang)}:** {user.user_id}")
         st.markdown(f"**{t('forms.phone', lang)}:** {user.phone}")
         st.markdown(f"**{t('forms.email', lang)}:** {user.email or '-'}")
-        st.markdown(f"**{t('forms.id_optional', lang)}:** {user.user_id or '-'}")
         st.markdown(f"**{t('forms.category', lang)}:** {category.name}")
         st.markdown(f"**{t('forms.street', lang)}:** {street.name}")
-
-        # Editable text field with random description as default
+        # Show a random event_call_desc split by comma
         if category.event_call_desc:
             options = [s.strip() for s in category.event_call_desc.split(',') if s.strip()]
             if options:
-                # Initialize custom text with random description if not already set or if empty
-                if "custom_text" not in st.session_state or not st.session_state.custom_text:
-                    st.session_state.custom_text = random.choice(options)
-                
-                # Show editable text area
-                st.markdown(f"**{t('forms.text', lang)}:**")
-                custom_text = st.text_area(
-                    label="Edit Text",  # Use fixed label instead of potentially empty translation
-                    value=st.session_state.custom_text,
-                    height=100,
-                    key="summary_text_input",
-                    label_visibility="collapsed"
-                )
-                # Update session state when text changes
-                if custom_text != st.session_state.custom_text:
-                    st.session_state.custom_text = custom_text
-        
+                random_desc = random.choice(options)
+                st.markdown(f"**{t('forms.text', lang)}:** {random_desc}")
         # Future-proof: file upload (disabled for now)
         uploaded_file = st.file_uploader("Upload a file (optional, not sent yet)", disabled=True)
-        if st.button(t('common.send', lang), type="primary"):
+        if st.button("SEND", type="primary"):
             # To enable file upload in the future, pass extra_files to api.submit_data
             extra_files = None
             # if uploaded_file:
             #     extra_files = {"attachment": (uploaded_file.name, uploaded_file, uploaded_file.type)}
-            
-            # Pass custom text to API service
-            custom_text = st.session_state.get("custom_text", "")
-            response = api.submit_data(user, category, street, custom_text=custom_text, extra_files=extra_files)
+            response = api.submit_data(user, category, street, extra_files=extra_files)
             if response.ResultCode == 200 and "SUCCESS" in response.ResultStatus:
                 ticket = response.data or response.ResultData.get("incidentNumber")
                 st.session_state.ticket_history.append(ticket)
@@ -200,9 +151,6 @@ def main():
                     st.session_state.selected_category = None
                     st.session_state.selected_street = None
                     st.session_state.search_query = ""
-                    st.session_state.custom_text = ""
-                    if "header_search_input" in st.session_state:
-                        del st.session_state["header_search_input"]
                 show_success_popup(ticket, restart, lang=lang)
             else:
                 def restart():
@@ -210,10 +158,7 @@ def main():
                     st.session_state.selected_category = None
                     st.session_state.selected_street = None
                     st.session_state.search_query = ""
-                    st.session_state.custom_text = ""
-                    if "header_search_input" in st.session_state:
-                        del st.session_state["header_search_input"]
                 show_error_popup(restart, lang=lang)
 
 if __name__ == "__main__":
-    main()
+    main() 

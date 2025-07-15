@@ -10,11 +10,11 @@ def validate_user_data(user_data):
     # Last name
     if not user_data.last_name or len(user_data.last_name) > 35:
         errors.append("last_name")
-    # ID
-    if not user_data.user_id.isdigit() or len(user_data.user_id) > 12:
+    # ID (optional)
+    if user_data.user_id and (not user_data.user_id.isdigit() or len(user_data.user_id) > 12):
         errors.append("user_id")
     # Phone
-    if not user_data.phone.isdigit() or len(user_data.phone) > 15:
+    if not user_data.phone or not user_data.phone.isdigit() or len(user_data.phone) > 15:
         errors.append("phone")
     # Email (optional)
     if user_data.email:

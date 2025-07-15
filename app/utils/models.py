@@ -32,8 +32,8 @@ class StreetNumber:
 class UserData:
     first_name: str
     last_name: str
-    user_id: str
     phone: str
+    user_id: Optional[str] = ""
     email: Optional[str] = None
 
 @dataclass
