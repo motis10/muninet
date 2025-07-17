@@ -77,12 +77,13 @@ def main():
 
 # Inject Google Analytics tracking script
     components.html("""
-    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-G973RH74MN"></script>
     <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
+
     gtag('config', 'G-G973RH74MN');
     </script>
     """, height=0, width=0)
