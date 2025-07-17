@@ -84,6 +84,66 @@ def get_fallback_translations(lang):
             "errors": {
                 "submission_failed": "Request submission failed"
             }
+        },
+        "fr": {
+            "common": {
+                "search": "Rechercher",
+                "save": "Sauvegarder",
+                "send": "Envoyer",
+                "cancel": "Annuler",
+                "one_time": "Remplir une seule fois",
+                "ticket_history": "Historique des tickets"
+            },
+            "forms": {
+                "first_name": "Prénom",
+                "last_name": "Nom de famille",
+                "phone": "Numéro de téléphone",
+                "email": "Email (Optionnel)",
+                "id_optional": "Numéro d'identité (Optionnel)",
+                "category": "Catégorie",
+                "street": "Rue",
+                "text": "Texte de plainte"
+            },
+            "success": {
+                "title": "Succès",
+                "message": "Votre demande a été soumise avec succès.",
+                "ticket_number": "Numéro de ticket",
+                "new_ticket": "Nouveau ticket",
+                "back_home": "Retour à l'accueil"
+            },
+            "errors": {
+                "submission_failed": "Échec de la soumission de la demande"
+            }
+        },
+        "ru": {
+            "common": {
+                "search": "Поиск",
+                "save": "Сохранить",
+                "send": "Отправить",
+                "cancel": "Отмена",
+                "one_time": "Заполните только один раз",
+                "ticket_history": "История заявок"
+            },
+            "forms": {
+                "first_name": "Имя",
+                "last_name": "Фамилия",
+                "phone": "Номер телефона",
+                "email": "Email (Необязательно)",
+                "id_optional": "Номер удостоверения (Необязательно)",
+                "category": "Категория",
+                "street": "Улица",
+                "text": "Текст жалобы"
+            },
+            "success": {
+                "title": "Успех",
+                "message": "Ваша заявка была успешно отправлена.",
+                "ticket_number": "Номер заявки",
+                "new_ticket": "Новая заявка",
+                "back_home": "Вернуться на главную"
+            },
+            "errors": {
+                "submission_failed": "Ошибка отправки заявки"
+            }
         }
     }
     return fallback.get(lang, fallback.get("en", {}))
