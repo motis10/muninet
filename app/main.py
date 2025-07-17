@@ -1,21 +1,50 @@
 import streamlit as st
-from app.components.header import render_header
-from app.components.grid_view import create_grid_view
-from app.components.popups import show_data_collection_popup, show_success_popup, show_error_popup
-from app.services.api_service import APIService
-from app.services.supabase_service import SupabaseService
-from app.services.storage_service import StorageService
-from app.config.settings import load_config
-from app.utils.i18n import t
+import os
+import sys
 from dotenv import load_dotenv
 import random
-load_dotenv()
 import streamlit.components.v1 as components
 
-storage = StorageService()  # <-- Move this to the top, after imports
+load_dotenv()
+
+# Add current directory to Python path for imports
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
+
+# Try different import strategies for deployment compatibility
+try:
+    from app.components.header import render_header
+    from app.components.grid_view import create_grid_view
+    from app.components.popups import show_data_collection_popup, show_success_popup, show_error_popup
+    from app.services.api_service import APIService
+    from app.services.supabase_service import SupabaseService
+    from app.services.storage_service import StorageService
+    from app.config.settings import load_config
+    from app.utils.i18n import t
+except ImportError:
+    # Fallback for deployment environments
+    try:
+        from components.header import render_header
+        from components.grid_view import create_grid_view
+        from components.popups import show_data_collection_popup, show_success_popup, show_error_popup
+        from services.api_service import APIService
+        from services.supabase_service import SupabaseService
+        from services.storage_service import StorageService
+        from config.settings import load_config
+        from utils.i18n import t
+    except ImportError as e:
+        st.error(f"Import error: {e}")
+        st.stop()
 
 # --- Session state keys ---
 def init_session_state():
+    # Initialize storage service for session state setup
+    storage = StorageService()
+    
     if "current_page" not in st.session_state:
         st.session_state.current_page = "categories"
     if "selected_category" not in st.session_state:

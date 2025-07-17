@@ -1,7 +1,30 @@
 import streamlit as st
-from app.utils.i18n import t
-from app.config.constants import SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE
 import os
+import sys
+
+# Add the app directory to the Python path if not already there
+app_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if app_dir not in sys.path:
+    sys.path.insert(0, app_dir)
+
+try:
+    from app.utils.i18n import t
+    from app.config.constants import SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE
+except ImportError:
+    # Fallback imports for deployment environments
+    try:
+        from utils.i18n import t
+        from config.constants import SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE
+    except ImportError:
+        # Final fallback with hardcoded values
+        def t(key, lang="he", **kwargs):
+            fallback_translations = {
+                "common.search": {"he": "חיפוש", "en": "Search"},
+            }
+            return fallback_translations.get(key, {}).get(lang, key)
+        
+        SUPPORTED_LANGUAGES = ["en", "he", "fr", "ru"]
+        DEFAULT_LANGUAGE = "he"
 
 def render_header(current_language=DEFAULT_LANGUAGE, on_language_change=None, search_query="", on_search=None):
     """
