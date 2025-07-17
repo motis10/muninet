@@ -76,17 +76,12 @@ def main():
     storage = StorageService()
 
 # Inject Google Analytics tracking script
-    components.html("""
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G973RH74MN"></script>
-    <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
+# Include Google Analytics tracking code
+    with open("google_analytics.html", "r") as f:
+        html_code = f.read()
+        components.html(html_code, height=0)
 
-    gtag('config', 'G-G973RH74MN');
-    </script>
-    """, height=0, width=0)
+    st.title("My Streamlit App")
 
     # Sidebar: Ticket History
     with st.sidebar:
