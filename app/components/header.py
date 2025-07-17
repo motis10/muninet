@@ -40,7 +40,7 @@ def render_header(current_language=DEFAULT_LANGUAGE, on_language_change=None, se
         /* Remove default Streamlit padding/margin from top */
         .main .block-container { padding-top: 0rem; padding-bottom: 0rem; }
         .stApp > header { height: 0rem; }
-        .stMainBlockContainer {padding: 0rem 1rem 10rem;} 
+        .stMainBlockContainer {padding: 1rem 1rem 10rem;} 
         .header-lang-row { display: flex; flex-direction: row; justify-content: center; gap: 0.5em; margin-bottom: 0.5em; }
         .header-banner { display: flex; justify-content: center; margin-bottom: 0.5em; }
         .header-search-row { display: flex; justify-content: center; margin-bottom: 1em; }
