@@ -49,10 +49,10 @@ def render_header(current_language=DEFAULT_LANGUAGE, on_language_change=None, se
             .header-banner, .header-search-row { flex-direction: column; align-items: center; }
 
             ### Mandatory for lang flags button will be horizontaly in mobile view
-            .stColumn[data-testid="stColumn"]:has(div[data-testid="stVerticalBlock"]):has(div[class*="lang_"]) {
+            .stColumn[data-testid="stColumn"]:has(div[data-testid="stVerticalBlock"]):has(div[class*="st-key-lang"]) {
                 min-width: auto !important;
             }
-            div[data-testid="stColumn"]:has(div[data-testid="stVerticalBlock"]):has(div[class*="lang_"]) {
+            div[data-testid="stColumn"]:has(div[data-testid="stVerticalBlock"]):has(div[class*="st-key-lang"]) {
                 min-width: auto !important;
             }
 
