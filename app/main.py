@@ -3,7 +3,7 @@ import os
 import sys
 from dotenv import load_dotenv
 import random
-import streamlit_analytics
+import streamlit.components.v1 as components
 
 load_dotenv()
 
@@ -70,8 +70,26 @@ def init_session_state():
 def main():
     config = load_config()
     
+    # Include Google Analytics tracking code
     if config.google_analytics_id:
-        streamlit_analytics.start_tracking(config.google_analytics_id)
+        try:
+            with open("google_analytics.html", "r") as f:
+                html_code = f.read()
+                # Replace the placeholder with actual tracking ID
+                html_code = html_code.replace("G-G973RH74MN", config.google_analytics_id)
+                components.html(html_code, height=0)
+        except FileNotFoundError:
+            # Fallback: create inline Google Analytics code
+            ga_code = f"""
+            <script async src="https://www.googletagmanager.com/gtag/js?id={config.google_analytics_id}"></script>
+            <script>
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){{dataLayer.push(arguments);}}
+              gtag('js', new Date());
+              gtag('config', '{config.google_analytics_id}');
+            </script>
+            """
+            components.html(ga_code, height=0)
     
     init_session_state()
     lang = st.session_state.current_language
