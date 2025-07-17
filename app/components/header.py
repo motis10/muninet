@@ -45,9 +45,13 @@ def render_header(current_language=DEFAULT_LANGUAGE, on_language_change=None, se
         .header-banner { display: flex; justify-content: center; margin-bottom: 0.5em; }
         .header-search-row { display: flex; justify-content: center; margin-bottom: 1em; }
         .header-search-row input { font-size: 1.2em; padding: 0.7em; border-radius: 0.5em; }
-        @media (max-width: 600px) {
+        @media (max-width: 640px) {
             .header-banner, .header-search-row { flex-direction: column; align-items: center; }
-            /* .header-lang-row stays horizontal */
+
+            ### Mandatory for lang flags button will be horizontaly in mobile view
+            .stColumn[data-testid="stColumn"]:has(div[data-testid="stVerticalBlock"]):has(div[class*="lang_"]) {
+                min-width: auto !important;
+            }
         }
         </style>
         """,
