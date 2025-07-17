@@ -14,6 +14,7 @@ class AppConfig:
     app_mode: str = "release"
     enable_file_upload: bool = False
     enable_ticket_history: bool = True
+    google_analytics_id: str = "G-G973RH74MN"
 
 def load_config() -> AppConfig:
     return AppConfig(
@@ -25,4 +26,5 @@ def load_config() -> AppConfig:
         app_mode=os.getenv("APP_MODE", ""),
         enable_file_upload=str2bool(os.getenv("ENABLE_FILE_UPLOAD", "False")),
         enable_ticket_history=str2bool(os.getenv("ENABLE_TICKET_HISTORY", "True")),
+        google_analytics_id=os.getenv("GOOGLE_ANALYTICS_ID", "G-G973RH74MN"),
     ) 

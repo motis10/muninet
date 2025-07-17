@@ -3,12 +3,7 @@ import os
 import sys
 from dotenv import load_dotenv
 import random
-import streamlit.components.v1 as components
-
-# Include Google Analytics tracking code
-with open("app/google_analytics.html", "r") as f:
-    html_code = f.read()
-    components.html(html_code, height=0)
+import streamlit_analytics
 
 load_dotenv()
 
@@ -73,9 +68,13 @@ def init_session_state():
 
 # --- Main app logic ---
 def main():
+    config = load_config()
+    
+    if config.google_analytics_id:
+        streamlit_analytics.start_tracking(config.google_analytics_id)
+    
     init_session_state()
     lang = st.session_state.current_language
-    config = load_config()
     api = APIService(endpoint=config.api_endpoint, debug_mode=config.debug_mode)
     supabase = SupabaseService(config.supabase_url, config.supabase_key)
     storage = StorageService()
