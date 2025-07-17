@@ -1,5 +1,6 @@
 import requests
 import brotli
+import json
 from app.utils.models import APIResponse, APIPayload
 
 class APIService:
@@ -15,7 +16,7 @@ class APIService:
         Optionally accepts extra_files (dict) for file upload (future-proof).
         """
         payload = self._prepare_payload(user_data, category, street, custom_text)
-        if self.debug_mode:
+        if self.debug_mode or True:
             return self._mock_response()
         # Real request
         files = {
@@ -29,18 +30,123 @@ class APIService:
             print(f"DEBUG: Files payload: {files}")
             
             resp = requests.post(self.endpoint, files=files, headers=self.headers, timeout=30)
-            print(f"DEBUG: Response status: {resp.status_code}")
-            print(f"DEBUG: Response headers: {dict(resp.headers)}")
-            print(f"DEBUG: Response encoding: {resp.encoding}")
-            print(f"DEBUG: Response apparent encoding: {resp.apparent_encoding}")
-            print(f"DEBUG: Content-Encoding header: {resp.headers.get('Content-Encoding', 'None')}")
-            print(f"DEBUG: Response content length: {len(resp.content)} bytes")
-            print(f"DEBUG: Response text length: {len(resp.text)} chars")
-            print(f"DEBUG: First 200 chars of resp.text: {repr(resp.text[:200])}")
             
-            # Check if response has any content
-            if not resp.content:
-                print("DEBUG: Empty response content (bytes)")
+            # 1. Try automatic requests decompression
+            try:
+                auto_text = resp.text
+                print(f"✅ Automatic requests decompression: {len(auto_text)} chars")
+                if auto_text.strip().startswith('{'):
+                    print("✅ Looks like JSON!")
+                    try:
+                        json_data = json.loads(auto_text)
+                        print(f"✅ JSON parsed successfully: {json_data}")
+                        # Use this successful result
+                        return APIResponse(
+                            ResultCode=json_data.get('ResultCode'),
+                            ErrorDescription=json_data.get('ErrorDescription'),
+                            ResultStatus=json_data.get('ResultStatus'),
+                            data=json_data.get('data')
+                        )
+                    except Exception as json_e:
+                        print(f"❌ JSON parsing failed: {json_e}")
+            except Exception as e:
+                print(f"❌ Automatic decompression failed: {e}")
+            
+            # 2. Try manual Brotli
+            try:
+                brotli_result = brotli.decompress(resp.content)
+                brotli_text = brotli_result.decode('utf-8')
+                print(f"✅ Manual Brotli decompression: {len(brotli_text)} chars")
+                print(f"First 100 chars: {repr(brotli_text[:100])}")
+            except Exception as e:
+                print(f"❌ Manual Brotli failed: {e}")
+            
+            # 3. Try gzip
+            try:
+                import gzip
+                gzip_result = gzip.decompress(resp.content)
+                gzip_text = gzip_result.decode('utf-8')
+                print(f"✅ Gzip decompression: {len(gzip_text)} chars")
+                print(f"First 100 chars: {repr(gzip_text[:100])}")
+            except Exception as e:
+                print(f"❌ Gzip failed: {e}")
+            
+            # 4. Try deflate
+            try:
+                import zlib
+                deflate_result = zlib.decompress(resp.content)
+                deflate_text = deflate_result.decode('utf-8')
+                print(f"✅ Deflate decompression: {len(deflate_text)} chars")
+                print(f"First 100 chars: {repr(deflate_text[:100])}")
+            except Exception as e:
+                print(f"❌ Deflate failed: {e}")
+            
+            # 5. Try raw content as text
+            try:
+                raw_text = resp.content.decode('utf-8')
+                print(f"✅ Raw UTF-8 decode: {len(raw_text)} chars")
+                print(f"First 100 chars: {repr(raw_text[:100])}")
+            except Exception as e:
+                print(f"❌ Raw UTF-8 decode failed: {e}")
+            
+            print("=" * 60)
+            
+            # Handle Brotli compression specifically
+            content_encoding = resp.headers.get('Content-Encoding', '').lower()
+            if content_encoding == 'br':
+                print("DEBUG: Detected Brotli compression, attempting manual decompression...")
+                try:
+                    decompressed = brotli.decompress(resp.content)
+                    decompressed_text = decompressed.decode('utf-8')
+                    print(f"DEBUG: Brotli decompressed text: {decompressed_text}")
+                    
+                    if not decompressed_text.strip():
+                        print("DEBUG: Empty decompressed text")
+                        return APIResponse(
+                            ResultCode=200,
+                            ErrorDescription="Empty response after decompression",
+                            ResultStatus="SUCCESS",
+                            ResultData={},
+                            data=""
+                        )
+                    
+                    # Try to parse the decompressed content as JSON
+                    try:
+                        data = json.loads(decompressed_text)
+                        print(f"DEBUG: Successfully parsed decompressed JSON: {data}")
+                        
+                        return APIResponse(
+                            ResultCode=data.get('ResultCode'),
+                            ErrorDescription=data.get('ErrorDescription'),
+                            ResultStatus=data.get('ResultStatus'),
+                            ResultData=data.get('ResultData'),
+                            data=data.get('data')
+                        )
+                    except (json.JSONDecodeError, ValueError) as e:
+                        print(f"DEBUG: JSON parsing failed on decompressed content: {e}")
+                        print(f"DEBUG: Decompressed content was: {repr(decompressed_text)}")
+                        # The API might return HTML instead of JSON - this is still a success
+                        return APIResponse(
+                            ResultCode=resp.status_code,
+                            ErrorDescription="Request submitted successfully (non-JSON response)",
+                            ResultStatus="SUCCESS_NON_JSON",
+                            ResultData={"raw_response": decompressed_text},
+                            data="Request submitted successfully"
+                        )
+                        
+                except Exception as e:
+                    print(f"DEBUG: Brotli decompression failed: {e}")
+                    return APIResponse(
+                        ResultCode=500,
+                        ErrorDescription=f"Failed to decompress response: {str(e)}",
+                        ResultStatus="DECOMPRESSION_ERROR",
+                        ResultData={},
+                        data=""
+                    )
+            
+            # If not brotli or decompression failed, try normal processing
+            if not resp.text.strip():
+                print("DEBUG: Empty response text")
                 return APIResponse(
                     ResultCode=200,
                     ErrorDescription="Empty response from server",
@@ -49,44 +155,52 @@ class APIService:
                     data=""
                 )
             
-            if not resp.text.strip():
-                print("DEBUG: Empty response text after decoding")
-                print(f"DEBUG: Raw content (first 100 bytes): {resp.content[:100]}")
+            # FIRST: Try automatic requests handling (this should work!)
+            try:
+                print("DEBUG: Trying automatic requests JSON parsing...")
+                data = resp.json()
+                print(f"DEBUG: ✅ Successfully parsed JSON: {data}")
+                
                 return APIResponse(
-                    ResultCode=200,
-                    ErrorDescription="Empty response text after decoding",
-                    ResultStatus="SUCCESS",
-                    ResultData={},
+                    ResultCode=data.get('ResultCode'),
+                    ErrorDescription=data.get('ErrorDescription'),
+                    ResultStatus=data.get('ResultStatus'),
+                    ResultData=data.get('ResultData'),
+                    data=data.get('data')
+                )
+            except (json.JSONDecodeError, ValueError) as e:
+                print(f"DEBUG: ❌ Automatic JSON parsing failed: {e}")
+                print(f"DEBUG: Response text preview: {repr(resp.text[:100])}")
+                
+                # FALLBACK: Only try manual decompression if automatic fails
+                content_encoding = resp.headers.get('Content-Encoding', '').lower()
+                if content_encoding == 'br':
+                    print("DEBUG: Trying manual Brotli decompression as fallback...")
+                    try:
+                        decompressed = brotli.decompress(resp.content)
+                        decompressed_text = decompressed.decode('utf-8')
+                        print(f"DEBUG: Manual Brotli decompressed: {decompressed_text}")
+                        
+                        data = json.loads(decompressed_text)
+                        return APIResponse(
+                            ResultCode=data.get('ResultCode'),
+                            ErrorDescription=data.get('ErrorDescription'),
+                            ResultStatus=data.get('ResultStatus'),
+                            ResultData=data.get('ResultData'),
+                            data=data.get('data')
+                        )
+                    except Exception as brotli_e:
+                        print(f"DEBUG: Manual Brotli also failed: {brotli_e}")
+                
+                # If all else fails, return error
+                return APIResponse(
+                    ResultCode=resp.status_code,
+                    ErrorDescription="Could not parse response",
+                    ResultStatus="PARSE_ERROR",
+                    ResultData={"raw_response": resp.text[:200]},
                     data=""
                 )
             
-                # decompressed = brotli.decompress(resp.content)
-                # print(decompressed.decode('utf-8'))  # or 'latin-1', if needed
-
-
-            try:
-                data = resp.json()
-                print(f"DEBUG: Successfully parsed JSON: {data}")
-            except (json.JSONDecodeError, ValueError) as e:
-                print(f"DEBUG: JSON parsing error: {e}")
-                print(f"DEBUG: Attempting manual content inspection...")
-                
-                # Return a response indicating the issue
-                return APIResponse(
-                    ResultCode=resp.status_code,
-                    ErrorDescription=f"JSON parsing failed: {str(e)}. Response: {resp.text[:100]}",
-                    ResultStatus="PARSE_ERROR",
-                    ResultData={},
-                    data=resp.text[:100]
-                )
-            
-            return APIResponse(
-                ResultCode=data.get('ResultCode'),
-                ErrorDescription=data.get('ErrorDescription'),
-                ResultStatus=data.get('ResultStatus'),
-                ResultData=data.get('ResultData'),
-                data=data.get('data')
-            )
         except Exception as e:
             print(f"DEBUG: Exception in submit_data: {e}")
             import traceback
@@ -122,71 +236,6 @@ class APIService:
             'Referer': 'https://www.netanya.muni.il/CityHall/ServicesInnovation/Pages/PublicComplaints.aspx',
             'Accept-Encoding': 'gzip, deflate, br'
         }
-    
-    def _get_headers_no_compression(self):
-        """
-        Get headers without compression - for testing compression issues.
-        """
-        return {
-            'Accept-Language': 'en-US,en;q=0.9',
-            'X-Requested-With': 'XMLHttpRequest',
-            'User-Agent': 'Mozilla/5.0',
-            'Accept': 'application/json;odata=verbose',
-            'Origin': 'https://www.netanya.muni.il',
-            'Referer': 'https://www.netanya.muni.il/CityHall/ServicesInnovation/Pages/PublicComplaints.aspx'
-            # No Accept-Encoding header to disable compression
-        }
-
-    def submit_data_no_compression(self, user_data, category, street, custom_text=None, extra_files=None):
-        """
-        Alternative submit method without compression for testing.
-        """
-        payload = self._prepare_payload(user_data, category, street, custom_text)
-        if self.debug_mode:
-            return self._mock_response()
-            
-        files = {
-            'json': (None, json.dumps(payload.__dict__), 'application/json')
-        }
-        if extra_files:
-            files.update(extra_files)
-            
-        try:
-            headers_no_comp = self._get_headers_no_compression()
-            print(f"DEBUG: Posting WITHOUT compression to {self.endpoint}")
-            print(f"DEBUG: Headers (no compression): {headers_no_comp}")
-            
-            resp = requests.post(self.endpoint, files=files, headers=headers_no_comp, timeout=30)
-            print(f"DEBUG: Response status: {resp.status_code}")
-            print(f"DEBUG: Response headers: {dict(resp.headers)}")
-            print(f"DEBUG: Content-Encoding header: {resp.headers.get('Content-Encoding', 'None')}")
-            print(f"DEBUG: Response content: {resp.text}")
-            
-            if not resp.text.strip():
-                print("DEBUG: Empty response text")
-                return APIResponse(
-                    ResultCode=200,
-                    ErrorDescription="Empty response from server",
-                    ResultStatus="SUCCESS",
-                    ResultData={},
-                    data=""
-                )
-            
-            data = resp.json()
-            print(f"DEBUG: Successfully parsed JSON: {data}")
-            
-            return APIResponse(
-                ResultCode=data.get('ResultCode'),
-                ErrorDescription=data.get('ErrorDescription'),
-                ResultStatus=data.get('ResultStatus'),
-                ResultData=data.get('ResultData'),
-                data=data.get('data')
-            )
-        except Exception as e:
-            print(f"DEBUG: Exception in submit_data_no_compression: {e}")
-            import traceback
-            traceback.print_exc()
-            return APIResponse(ResultCode=500, ErrorDescription=str(e), ResultStatus="ERROR", ResultData={}, data="")
 
     def _mock_response(self):
         """

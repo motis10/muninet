@@ -6,11 +6,11 @@ from app.services.api_service import APIService
 from app.services.supabase_service import SupabaseService
 from app.services.storage_service import StorageService
 from app.config.settings import load_config
-from app.utils.models import Category, StreetNumber, UserData
 from app.utils.i18n import t
 from dotenv import load_dotenv
 import random
 load_dotenv()
+import streamlit.components.v1 as components
 
 storage = StorageService()  # <-- Move this to the top, after imports
 
@@ -45,6 +45,19 @@ def main():
     api = APIService(endpoint=config.api_endpoint, debug_mode=config.debug_mode)
     supabase = SupabaseService(config.supabase_url, config.supabase_key)
     storage = StorageService()
+
+# Inject Google Analytics tracking script
+    components.html("""
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G973RH74MN"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-G973RH74MN', {
+        'debug_mode': true
+    });
+    </script>
+    """, height=0, width=0)
 
     # Sidebar: Ticket History
     with st.sidebar:
@@ -190,30 +203,63 @@ def main():
             
             # Pass custom text to API service
             custom_text = st.session_state.get("custom_text", "")
+            
             response = api.submit_data(user, category, street, custom_text=custom_text, extra_files=extra_files)
             if response.ResultCode == 200 and "SUCCESS" in response.ResultStatus:
-                ticket = response.data or response.ResultData.get("incidentNumber")
+                ticket = response.data
                 st.session_state.ticket_history.append(ticket)
                 storage.save_ticket(ticket)
-                def restart():
-                    st.session_state.current_page = "categories"
-                    st.session_state.selected_category = None
-                    st.session_state.selected_street = None
-                    st.session_state.search_query = ""
-                    st.session_state.custom_text = ""
-                    if "header_search_input" in st.session_state:
-                        del st.session_state["header_search_input"]
-                show_success_popup(ticket, restart, lang=lang)
+                st.session_state.last_ticket_number = ticket
+                st.session_state.current_page = "success"
+                st.rerun()
             else:
-                def restart():
-                    st.session_state.current_page = "categories"
-                    st.session_state.selected_category = None
-                    st.session_state.selected_street = None
-                    st.session_state.search_query = ""
-                    st.session_state.custom_text = ""
-                    if "header_search_input" in st.session_state:
-                        del st.session_state["header_search_input"]
-                show_error_popup(restart, lang=lang)
+                st.error(f"❌ {t('errors.submission_failed', lang)}: {response.ResultMessage}")
+
+    elif st.session_state.current_page == "success":
+        
+        # Get ticket info from session state
+        ticket_number = st.session_state.get('last_ticket_number')
+        user_data = st.session_state.get('user_data')
+        category_data = st.session_state.get('selected_category')
+        street_data = st.session_state.get('selected_street')
+        
+        # Success message container
+        with st.container():
+            st.markdown(
+                f"""
+                <div style="text-align: center; padding: 2rem; background: #d4edda; 
+                            border: 1px solid #c3e6cb; border-radius: 8px; margin: 2rem 0;">
+                    <h2 style="color: #155724; margin-bottom: 1rem;">
+                        ✅ {t('success.title', lang)}
+                    </h2>
+                    <h3 style="color: #155724; margin-bottom: 2rem;">
+                        {t('success.ticket_number', lang)}: <strong>{ticket_number or 'N/A'}</strong>
+                    </h3>
+                    <p style="color: #155724; font-size: 1.1rem; margin-bottom: 1rem;">
+                        {t('success.message', lang)}
+                    </p>
+                </div>
+                """, 
+                unsafe_allow_html=True
+            )
+        
+        # Action buttons
+        st.markdown("---")
+        col1, col3 = st.columns([1, 1])
+        
+        with col1:
+            if st.button(t('success.new_ticket', lang), type="primary", use_container_width=True):
+                # Clear session state and start over
+                for key in ['user_data', 'selected_category', 'selected_street', 'last_ticket_number', 'custom_text']:
+                    if key in st.session_state:
+                        del st.session_state[key]
+                st.session_state.current_page = "categories"
+                st.rerun()
+                
+        with col3:
+            if st.button(t('success.back_home', lang), use_container_width=True):
+                st.session_state.current_page = "categories"
+                st.rerun()
 
 if __name__ == "__main__":
     main()

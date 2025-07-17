@@ -1,6 +1,8 @@
 import streamlit as st
 import json
 from app.utils.models import UserData
+from app.utils.i18n import t
+from app.components.header import render_header
 
 # Try to import streamlit_local_storage, fallback to None if it fails
 try:
@@ -86,34 +88,55 @@ class StorageService:
         
         return st.session_state.get(self.LANG_KEY, "en")
 
-    def save_ticket(self, ticket_number: str):
-        """Save ticket number to history in browser localStorage or session state."""
+    def save_ticket(self, ticket):
+        """Save a ticket to history (both localStorage and session state)."""
+        # Get current history
         tickets = self.get_ticket_history()
-        tickets.append(ticket_number)
         
+        # Handle ticket as string (ticket number/ID)
+        if isinstance(ticket, str):
+            ticket_id = ticket
+        elif isinstance(ticket, dict):
+            ticket_id = ticket.get('ticket_id') or ticket.get('data') or str(ticket)
+        else:
+            ticket_id = str(ticket)  # Convert to string as fallback
+        
+        # Add new ticket (avoid duplicates)
+        if ticket_id and ticket_id not in tickets:
+            tickets.append(ticket_id)
+            print(f"DEBUG: Added ticket {ticket_id} to history. Total tickets: {len(tickets)}")
+        else:
+            print(f"DEBUG: Ticket {ticket_id} already exists or is invalid")
+        
+        # Save to localStorage as JSON string (array of strings)
         if HAS_LOCAL_STORAGE and self.local_storage:
             try:
                 self.local_storage.setItem(self.TICKET_KEY, json.dumps(tickets))
-                return
+                print(f"DEBUG: Saved to localStorage: {tickets}")
             except Exception as e:
-                print(f"Error saving ticket to localStorage: {e}")
+                print(f"Error saving to localStorage: {e}")
         
-        st.session_state[self.TICKET_KEY] = json.dumps(tickets)
+        # Also save to session state as backup (array of strings)
+        st.session_state[self.TICKET_KEY] = tickets
+        print(f"DEBUG: Saved to session state: {tickets}")
 
     def get_ticket_history(self):
         """Get ticket history from browser localStorage or session state."""
         if HAS_LOCAL_STORAGE and self.local_storage:
             try:
                 data = self.local_storage.getItem(self.TICKET_KEY)
+                print(f"DEBUG: Ticket history from localStorage: {data}")
                 if data:
-                    return json.loads(data)
+                    # localStorage stores as JSON string, parse to get the list
+                    parsed = json.loads(data)
+                    return parsed if isinstance(parsed, list) else []
             except Exception as e:
                 print(f"Error loading ticket history from localStorage: {e}")
         
-        data = st.session_state.get(self.TICKET_KEY)
-        if data:
-            return json.loads(data)
-        return []
+        # Fallback to session state
+        data = st.session_state.get(self.TICKET_KEY, [])
+        print(f"DEBUG2: Ticket history from session state: {data}")
+        return data if isinstance(data, list) else []
 
     def clear_user_data(self):
         """Clear all user data from browser localStorage or session state."""

@@ -54,7 +54,7 @@ class APIPayload:
     callerFirstName: str = ""
     callerLastName: str = ""
     callerTZ: str = ""
-    callerPhone1: str = ""
+    callerPhone1: int = 0  # Change this to int
     callerEmail: str = ""
     contactUsType: str = "3"
 
