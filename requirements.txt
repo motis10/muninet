@@ -8,3 +8,4 @@ python-dotenv
 typing-extensions 
 streamlit-local-storage
 brotli
+streamlit-analytics
