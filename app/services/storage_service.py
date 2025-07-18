@@ -31,38 +31,56 @@ class StorageService:
         return self._local_storage if self._local_storage is not False else None
 
     def save_user_data(self, user_data: UserData):
-        """Save user data to browser localStorage or session state."""
+        """Save user data to browser localStorage AND session state immediately."""
         data_json = json.dumps(user_data.__dict__)
         
+        # CRITICAL: Save to session state FIRST for immediate access
+        st.session_state[self.USER_KEY] = data_json
+        st.session_state.user_data = user_data  # Also store the object directly
+        print("✅ User data saved to session state immediately")
+        
+        # Then save to localStorage for persistence (async)
         if HAS_LOCAL_STORAGE and self.local_storage:
             try:
                 self.local_storage.setItem(self.USER_KEY, data_json)
-                print("User data saved to localStorage")
-                return
+                print("✅ User data queued for localStorage")
             except Exception as e:
-                print(f"Error saving to localStorage: {e}")
-        
-        # Fallback to session state
-        st.session_state[self.USER_KEY] = data_json
-        print("User data saved to session state")
+                print(f"❌ Error saving to localStorage: {e}")
 
     def load_user_data(self) -> UserData:
-        """Load user data from browser localStorage or session state."""
+        """Load user data from session state first, then localStorage."""
         
+        # Check session state first (immediate access)
+        if hasattr(st.session_state, 'user_data') and st.session_state.user_data:
+            print("✅ Loaded user data from session_state object")
+            return st.session_state.user_data
+        
+        # Check session state JSON backup
+        data = st.session_state.get(self.USER_KEY)
+        if data:
+            try:
+                d = json.loads(data)
+                user_data = UserData(**d)
+                st.session_state.user_data = user_data  # Cache the object
+                print("✅ Loaded user data from session_state JSON")
+                return user_data
+            except Exception as e:
+                print(f"Error parsing session state data: {e}")
+        
+        # Finally try localStorage (for persistence across sessions)
         if HAS_LOCAL_STORAGE and self.local_storage:
             try:
                 data = self.local_storage.getItem(self.USER_KEY)
                 if data:
                     d = json.loads(data)
-                    return UserData(**d)
+                    user_data = UserData(**d)
+                    st.session_state.user_data = user_data  # Cache the object
+                    print("✅ Loaded user data from localStorage")
+                    return user_data
             except Exception as e:
                 print(f"Error loading from localStorage: {e}")
         
-        # Fallback to session state
-        data = st.session_state.get(self.USER_KEY)
-        if data:
-            d = json.loads(data)
-            return UserData(**d)
+        print("❌ No user data found")
         return None
 
     def save_language(self, language: str):

@@ -97,6 +97,71 @@ def main():
     supabase = SupabaseService(config.supabase_url, config.supabase_key)
     storage = StorageService()
 
+    # Handle URL parameters for direct navigation
+    def handle_url_parameters():
+        """Handle URL parameters to pre-fill category and street selections"""
+        try:
+            # Get URL parameters from Streamlit
+            query_params = st.query_params
+            
+            category_id = query_params.get("category_id") or query_params.get("category")
+            street_id = query_params.get("street_id") or query_params.get("street")
+            
+            if category_id and street_id:
+                # Only process if we haven't already processed these parameters
+                if not st.session_state.get("url_params_processed", False):
+                    # Fetch data if not already cached
+                    if st.session_state.categories_data is None:
+                        st.session_state.categories_data = supabase.get_categories()
+                    if st.session_state.streets_data is None:
+                        st.session_state.streets_data = supabase.get_street_numbers()
+                    
+                    categories = st.session_state.categories_data or []
+                    streets = st.session_state.streets_data or []
+                    
+                    # Find matching category and street
+                    selected_category = None
+                    selected_street = None
+                    
+                    for category in categories:
+                        if str(category.id) == str(category_id):
+                            selected_category = category
+                            break
+                    
+                    for street in streets:
+                        if str(street.id) == str(street_id):
+                            selected_street = street
+                            break
+                    
+                    if selected_category and selected_street:
+                        # Set the selections in session state
+                        st.session_state.selected_category = selected_category
+                        st.session_state.selected_street = selected_street
+                        
+                        # Clear URL parameters
+                        st.query_params.clear()
+                        
+                        # Check if user has personal data
+                        user_data = st.session_state.user_data
+                        if user_data:
+                            # User has data, go directly to summary
+                            st.session_state.current_page = "summary"
+                        else:
+                            # User needs to fill personal data first
+                            st.session_state.current_page = "categories"
+                            st.session_state.show_popup = True
+                        
+                        # Mark URL parameters as processed
+                        st.session_state.url_params_processed = True
+                        st.rerun()
+                        
+        except Exception as e:
+            # If there's any error with URL processing, just continue normally
+            print(f"Error processing URL parameters: {e}")
+
+    # Call the URL parameter handler
+    handle_url_parameters()
+
     # Sidebar: Ticket History
     with st.sidebar:
         tickets = storage.get_ticket_history()
@@ -155,15 +220,28 @@ def main():
         if st.session_state.show_popup:
             def save_user(user):
                 st.session_state.user_data = user
-                storage.save_user_data(user)  # <-- Add this line
+                storage.save_user_data(user)
                 st.session_state.show_popup = False
-                st.session_state.current_page = "streets"
+                
+                # Check if we already have both category and street selected (from URL params)
+                if st.session_state.selected_category and st.session_state.selected_street:
+                    # Both are selected, go directly to summary
+                    st.session_state.current_page = "summary"
+                else:
+                    # Need to select street, go to streets page
+                    st.session_state.current_page = "streets"
+                
                 st.session_state.search_query = ""
                 # Clear popup form keys and search input
                 for k in ["popup_first_name", "popup_last_name", "popup_id", "popup_phone", "popup_email", "header_search_input", "custom_text"]:
                     if k in st.session_state:
                         del st.session_state[k]
+                
+                # Give localStorage time to save before rerunning
+                import time
+                time.sleep(0.2)  # 200ms delay
                 st.rerun()
+
             def cancel_user():
                 st.session_state.show_popup = False
                 st.session_state.selected_category = None
