@@ -49,7 +49,9 @@ def get_fallback_translations(lang):
                 "message": "הבקשה שלך נשלחה בהצלחה.",
                 "ticket_number": "מס קריאה",
                 "new_ticket": "פתח קריאה חדשה",
-                "back_home": "חזרה לדף הבית"
+                "back_home": "חזרה לדף הבית",
+                "share_neighbor": "שתף עם שכן",
+                "share_neighbor_text": "תעזור לי להתלונן על זה"
             },
             "errors": {
                 "submission_failed": "שליחת הבקשה נכשלה"
@@ -79,7 +81,9 @@ def get_fallback_translations(lang):
                 "message": "Your request has been submitted successfully.",
                 "ticket_number": "Ticket Number",
                 "new_ticket": "New Ticket",
-                "back_home": "Back to Home"
+                "back_home": "Back to Home",
+                "share_neighbor": "Share with Neighbor",
+                "share_neighbor_text": "Help me to complain about it"
             },
             "errors": {
                 "submission_failed": "Request submission failed"
@@ -109,7 +113,9 @@ def get_fallback_translations(lang):
                 "message": "Votre demande a été soumise avec succès.",
                 "ticket_number": "Numéro de ticket",
                 "new_ticket": "Nouveau ticket",
-                "back_home": "Retour à l'accueil"
+                "back_home": "Retour à l'accueil",
+                "share_neighbor": "Partager avec un voisin",
+                "share_neighbor_text": "Aidez-moi à plaindre"
             },
             "errors": {
                 "submission_failed": "Échec de la soumission de la demande"
@@ -139,7 +145,9 @@ def get_fallback_translations(lang):
                 "message": "Ваша заявка была успешно отправлена.",
                 "ticket_number": "Номер заявки",
                 "new_ticket": "Новая заявка",
-                "back_home": "Вернуться на главную"
+                "back_home": "Вернуться на главную",
+                "share_neighbor": "Поделиться с соседом",
+                "share_neighbor_text": "Помогите мне пожаловаться"
             },
             "errors": {
                 "submission_failed": "Ошибка отправки заявки"

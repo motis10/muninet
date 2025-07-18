@@ -295,9 +295,20 @@ def main():
                 st.rerun()
                 
         with col3:
-            if st.button(t('success.back_home', lang), use_container_width=True):
-                st.session_state.current_page = "categories"
-                st.rerun()
+            # Create WhatsApp share URL
+            category_id = category_data.id if category_data else ""
+            street_id = street_data.id if street_data else ""
+            share_url = f"https://agamim.streamlit.app?category={category_id}%26street={street_id}"
+            print(share_url)
+            whatsapp_text = t('success.share_neighbor_text', lang)
+            whatsapp_url = f"https://wa.me/?text={whatsapp_text}%20{share_url}"
+            
+            # Use st.link_button for WhatsApp sharing
+            st.link_button(
+                t('success.share_neighbor', lang), 
+                whatsapp_url, 
+                use_container_width=True
+            )
 
 if __name__ == "__main__":
     main()

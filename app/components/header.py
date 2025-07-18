@@ -26,6 +26,8 @@ except ImportError:
         SUPPORTED_LANGUAGES = ["en", "he", "fr", "ru"]
         DEFAULT_LANGUAGE = "he"
 
+import streamlit.components.v1 as components
+
 def render_header(current_language=DEFAULT_LANGUAGE, on_language_change=None, search_query="", on_search=None):
     """
     Render the app header in the following order:
@@ -69,13 +71,43 @@ def render_header(current_language=DEFAULT_LANGUAGE, on_language_change=None, se
             if st.button(lang_labels.get(lang, lang), key=f"lang_{lang}"):
                 if on_language_change:
                     on_language_change(lang)
-    # 2. Banner image
-    st.markdown('<div class="header-banner">', unsafe_allow_html=True)
-    try:
-        st.image("assets/images/banner.png", use_container_width=True)
-    except Exception:
-        st.markdown("**Netanya App** (Banner image not found)")
-    st.markdown('</div>', unsafe_allow_html=True)
+    # 2. Banner image (clickable with persistent JavaScript)
+    components.html("""
+<style>
+.clickable-banner {
+    width: 100%;
+    cursor: pointer;
+    display: block;
+    max-height: none;
+    height: auto;
+}
+.clickable-banner:hover {
+    opacity: 0.9;
+}
+</style>
+
+<img src="https://icvcosdvagxhxfniwpko.supabase.co/storage/v1/object/public/muni/website/compressed_banner.jpg" 
+     class="clickable-banner"
+     onclick="window.parent.location.reload()" 
+     title="Click to refresh page" />
+
+<script>
+// Auto-adjust height and ensure click works
+window.onload = function() {
+    const img = document.querySelector('.clickable-banner');
+    if (img) {
+        img.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (window.parent && window.parent !== window) {
+                window.parent.location.reload();
+            } else {
+                window.location.reload();
+            }
+        });
+    }
+};
+</script>
+""", height=263)  # Increased height
     # 3. Search box
     if search_query is not None and on_search is not None:
         st.markdown('<div class="header-search-row">', unsafe_allow_html=True)
