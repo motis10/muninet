@@ -1,0 +1,48 @@
+{
+  "common": {
+    "welcome": "Добро пожаловать",
+    "search": "Search",
+    "save": "Save",
+    "send": "Отправить",
+    "one_time": "Fill it one time only",
+    "cancel": "Cancel",
+    "start_over": "Start Over",
+    "try_again": "Try Again",
+    "ticket_history": "Ticket History"
+  },
+  "forms": {
+    "first_name": "Имя",
+    "last_name": "Фамилия",
+    "id": "Номер удостоверения",
+    "id_optional": "Номер удостоверения (Необязательно)",
+    "phone": "Номер телефона",
+    "email": "Email (Необязательно)",
+    "category": "Категория",
+    "street": "Улица",
+    "text": "Текст жалобы"
+  },
+  "messages": {
+    "success_message": "Your request has been submitted successfully. Ticket number: {ticket_number}",
+    "error_message": "Failed, please try again",
+    "save_locally": "Your data will be saved locally only"
+  },
+  "validation": {
+    "first_name": "Имя обязательно и должно быть не более 35 символов.",
+    "last_name": "Фамилия обязательна и должна быть не более 35 символов.",
+    "user_id": "ID должен быть числом и содержать до 12 цифр.",
+    "phone": "Неверный номер телефона.",
+    "email": "Invalid email format."
+  },
+  "success": {
+    "new_ticket": "Новая заявка",
+    "back_home": "Вернуться на главную",
+    "share_neighbor": "Поделиться с соседом",
+    "ticket_number": "Номер заявки",
+    "title": "Успех",
+    "message": "Ваша заявка была успешно отправлена.",
+    "share_neighbor_text": "Помогите мне пожаловаться"
+  },
+  "errors": {
+    "submission_failed": "Ошибка отправки заявки"
+  }
+} 

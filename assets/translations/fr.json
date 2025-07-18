@@ -1,0 +1,48 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "search": "Search",
+    "save": "Save",
+    "send": "Envoyer",
+    "one_time": "Fill it one time only",
+    "cancel": "Cancel",
+    "start_over": "Start Over",
+    "try_again": "Try Again",
+    "ticket_history": "Ticket History"
+  },
+  "forms": {
+    "first_name": "Prénom",
+    "last_name": "Nom de famille",
+    "id": "Numéro d'identité",
+    "id_optional": "Numéro d'identité (Optionnel)",
+    "phone": "Numéro de téléphone",
+    "email": "Email (Optionnel)",
+    "category": "Catégorie",
+    "street": "Rue",
+    "text": "Texte de plainte"
+  },
+  "messages": {
+    "success_message": "Your request has been submitted successfully. Ticket number: {ticket_number}",
+    "error_message": "Failed, please try again",
+    "save_locally": "Your data will be saved locally only"
+  },
+  "validation": {
+    "first_name": "Le prénom est requis et doit contenir entre 3 et 35 caractères.",
+    "last_name": "Le nom de famille est requis et doit contenir entre 3 et 35 caractères.",
+    "user_id": "L'identifiant doit être numérique et comporter jusqu'à 12 chiffres.",
+    "phone": "Le numéro de téléphone est invalide.",
+    "email": "Invalid email format."
+  }, 
+  "success": {
+    "new_ticket": "Nouveau ticket",
+    "back_home": "Retour à l'accueil",
+    "share_neighbor": "Partager avec un voisin",
+    "ticket_number": "Numéro de ticket",
+    "title": "Succès",
+    "message": "Votre demande a été soumise avec succès.",
+    "share_neighbor_text": "Aidez-moi à plaindre"
+  },
+  "errors": {
+    "submission_failed": "Échec de la soumission de la demande"
+  }
+} 

@@ -10,4 +10,3 @@ __pycache__/
 .coverage
 htmlcov/
 .streamlit/secrets.toml
-assets/translations/*.json 

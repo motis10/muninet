@@ -1,0 +1,48 @@
+{
+  "common": {
+    "welcome": "לשום",
+    "search": "חיפוש",
+    "save": "שמור",
+    "send": "שלח",
+    "one_time": "יש למלא פרטים אישיים פעם אחת בלבד",
+    "cancel": "ביטול",
+    "start_over": "התחל מחדש",
+    "try_again": "נסה שנית",
+    "ticket_history": "היסטוריית תקלות"
+  },
+  "forms": {
+    "first_name": "שם פרטי",
+    "last_name": "שם משפחה",
+    "id": "תז",
+    "id_optional": "תז - לא חובה",
+    "phone": "טלפון",
+    "email": "אימייל - לא חובה",
+    "category": "קטגוריה",
+    "street": "רחוב",
+    "text": "תלונה"
+  },
+  "messages": {
+    "success_message": "Your request has been submitted successfully. Ticket number: {ticket_number}",
+    "error_message": "Failed, please try again",
+    "save_locally": "Your data will be saved locally only"
+  },
+  "validation": {
+    "first_name": "שם פרטי נדרש וחייב להיות בין 3 ל-35 תווים.",
+    "last_name": "שם משפחה נדרש וחייב להיות בין 3 ל-35 תווים.",
+    "user_id": "מספר זהות שגוי.",
+    "phone": "מספר טלפון שגוי.",
+    "email": "Invalid email format."
+  },
+  "success": {
+    "new_ticket": "פתח קריאה חדשה",
+    "back_home": "חזרה לדף הבית",
+    "share_neighbor": "שתף עם שכן",
+    "ticket_number": "מס קריאה",
+    "title": "נפתחה קריאה חדשה",
+    "message": "הבקשה שלך נשלחה בהצלחה.",
+    "share_neighbor_text": "תעזור לי להתלונן על זה"
+  },
+  "errors": {
+    "submission_failed": "שליחת הבקשה נכשלה"
+  }
+} 

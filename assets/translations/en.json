@@ -1,0 +1,56 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "search": "Search",
+    "save": "Save",
+    "send": "Send",
+    "one_time": "Fill it one time only",
+    "cancel": "Cancel",
+    "start_over": "Start Over",
+    "try_again": "Try Again",
+    "ticket_history": "Ticket History"
+  },
+  "forms": {
+    "first_name": "First Name",
+    "last_name": "Last Name",
+    "id": "ID Number",
+    "id_optional": "ID Number (Optional)",
+    "phone": "Phone Number",
+    "email": "Email (Optional)",
+    "category": "Category",
+    "street": "Street",
+    "text": "Complain Text"
+  },
+  "messages": {
+    "success_message": "Your request has been submitted successfully. Ticket number: {ticket_number}",
+    "error_message": "Failed, please try again",
+    "save_locally": "Your data will be saved locally only"
+  },
+  "validation": {
+    "first_name": "First name is required and must be 35 characters or less.",
+    "last_name": "Last name is required and must be 35 characters or less.",
+    "user_id": "ID must be numeric and up to 12 digits.",
+    "phone": "Invalid phone number.",
+    "email": "Invalid email format."
+  },
+  "api_error": {
+    "network": "Network error: Please check your connection.",
+    "timeout": "Request timed out. Please try again.",
+    "generic": "An error occurred while communicating with the server."
+  },
+  "database_error": {
+    "generic": "A database error occurred. Please try again later."
+  },
+  "success": {
+    "new_ticket": "New Ticket",
+    "back_home": "Back to Home",
+    "share_neighbor": "Share with Neighbor",
+    "ticket_number": "Ticket Number",
+    "title": "Success",
+    "message": "Your request has been submitted successfully.",
+    "share_neighbor_text": "Help me to complain about it"
+  },
+  "errors": {
+    "submission_failed": "Request submission failed"
+  }
+} 
