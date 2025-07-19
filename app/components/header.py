@@ -50,17 +50,40 @@ def render_header(current_language=DEFAULT_LANGUAGE, on_language_change=None, se
         @media (max-width: 640px) {
             .header-banner, .header-search-row { flex-direction: column; align-items: center; }
 
-            ### Mandatory for lang flags button will be horizontaly in mobile view
-            .stColumn[data-testid="stColumn"]:has(div[data-testid="stVerticalBlock"]):has(div[class*="st-key-lang"]) {
-                min-width: auto !important;
-            }
-            div[data-testid="stColumn"]:has(div[data-testid="stVerticalBlock"]):has(div[class*="st-key-lang"]) {
-                min-width: auto !important;
-            }
+                     ### Mandatory for lang flags button will be horizontaly in mobile view
+         .stColumn[data-testid="stColumn"]:has(div[data-testid="stVerticalBlock"]):has(div[class*="st-key-lang"]) {
+             min-width: auto !important;
+         }
+         div[data-testid="stColumn"]:has(div[data-testid="stVerticalBlock"]):has(div[class*="st-key-lang"]) {
+             min-width: auto !important;
+         }
+         
+         /* Hide the parent container for this CSS-only markdown */
+         div[data-testid="stElementContainer"]:has(.header-container1) {
+             display: none !important;
+             height: 0 !important;
+             margin: 0 !important;
+             padding: 0 !important;
+         }
 
-        }
-        </style>
-        """,
+         div[data-testid="stElementContainer"]:has(.header-container2) {
+             display: none !important;
+             height: 0 !important;
+             margin: 0 !important;
+             padding: 0 !important;
+         }
+
+         div[data-testid="stElementContainer"]:has(.header-container3) {
+             display: none !important;
+             height: 0 !important;
+             margin: 0 !important;
+             padding: 0 !important;
+         }
+
+         }
+         </style>
+         <div class="header-container1"></div>
+         """,
         unsafe_allow_html=True,
     )
     # 1. Language icons row
@@ -133,7 +156,16 @@ window.onload = function() {{
     # RTL styling for Hebrew
     if current_language == "he":
         st.markdown("""
-        <style>
-        .stApp { direction: rtl; text-align: right; }
-        </style>
-        """, unsafe_allow_html=True) 
+                 <style>
+         .stApp { direction: rtl; text-align: right; }
+         
+         /* Hide the parent container for this CSS-only markdown */
+         div[data-testid="stElementContainer"]:has(.header-container2) {
+             display: none !important;
+             height: 0 !important;
+             margin: 0 !important;
+             padding: 0 !important;
+         }
+         </style>
+         <div class="header-container2"></div>
+         """, unsafe_allow_html=True) 
