@@ -72,18 +72,26 @@ def render_header(current_language=DEFAULT_LANGUAGE, on_language_change=None, se
                 if on_language_change:
                     on_language_change(lang)
     # 2. Banner image (clickable with persistent JavaScript)
-    components.html("""
+
+
+    components.html(f"""
 <style>
-.clickable-banner {
+.clickable-banner {{
     width: 100%;
     cursor: pointer;
     display: block;
     max-height: none;
-    height: auto;
-}
-.clickable-banner:hover {
+    height: 263px;
+    object-fit: cover;
+}}
+.clickable-banner:hover {{
     opacity: 0.9;
-}
+}}
+@media (max-width: 600px) {{
+    .clickable-banner {{
+        height: 140px;
+    }}
+}}
 </style>
 
 <img src="https://icvcosdvagxhxfniwpko.supabase.co/storage/v1/object/public/muni/website/compressed_banner.jpg" 
@@ -93,38 +101,34 @@ def render_header(current_language=DEFAULT_LANGUAGE, on_language_change=None, se
 
 <script>
 // Auto-adjust height and ensure click works
-window.onload = function() {
+window.onload = function() {{
     const img = document.querySelector('.clickable-banner');
-    if (img) {
-        img.addEventListener('click', function(e) {
+    if (img) {{
+        img.addEventListener('click', function(e) {{
             e.preventDefault();
-            if (window.parent && window.parent !== window) {
+            if (window.parent && window.parent !== window) {{
                 window.parent.location.reload();
-            } else {
+            }} else {{
                 window.location.reload();
-            }
-        });
-    }
-};
+            }}
+        }});
+    }}
+}};
 </script>
-""", height=263)  # Increased height
-    # 3. Search box
+""", height=140)
+    # 3. Search box (simple and compact)
     if search_query is not None and on_search is not None:
         st.markdown('<div class="header-search-row">', unsafe_allow_html=True)
-        search_col1, search_col2 = st.columns([4,1])
-        with search_col1:
-            # Use search_query parameter to control the input value for proper clearing
-            search_input = st.text_input(
-                t("common.search", current_language),
-                value=search_query if search_query else "",
-                key="header_search_input", 
-                placeholder=t("common.search", current_language),
-                label_visibility="collapsed"
-            )
-        with search_col2:
-            if st.button("🔍", key="search_btn"):
-                if on_search:
-                    on_search()
+        
+        # Simple one-column search for mobile
+        search_input = st.text_input(
+            t("common.search", current_language),
+            value=search_query if search_query else "",
+            key="header_search_input", 
+            placeholder=f"🔍 {t('common.search', current_language)}",
+            label_visibility="collapsed"
+        )
+        
         st.markdown('</div>', unsafe_allow_html=True)
     # RTL styling for Hebrew
     if current_language == "he":
