@@ -104,8 +104,8 @@ def render_header(current_language=DEFAULT_LANGUAGE, on_language_change=None, se
     cursor: pointer;
     display: block;
     max-height: none;
-    height: 263px;
-    object-fit: cover;
+    height: 140px;
+    object-fit: contain;
 }}
 .clickable-banner:hover {{
     opacity: 0.9;
