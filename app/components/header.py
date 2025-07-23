@@ -49,13 +49,7 @@ def render_header(current_language=DEFAULT_LANGUAGE, on_language_change=None, se
             background-color: white !important;
             color: black !important;
         }
-        
-        /* Override dark mode for specific elements */
-        .stMarkdown, .stText, .stButton button, .stTextInput input, .stSelectbox select {
-            background-color: white !important;
-            color: black !important;
-        }
-        
+                
         /* Ensure buttons and inputs stay light */
         button[data-testid="stBaseButton-secondary"] {
             background-color: #f0f2f6 !important;

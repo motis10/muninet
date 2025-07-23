@@ -69,7 +69,11 @@ def init_session_state():
 # --- Main app logic ---
 def main():
     config = load_config()
-    st.set_page_config(page_title="Netanya Municipality", layout="centered")
+    st.set_page_config(
+        page_title="Netanya Municipality", 
+        layout="centered",
+        initial_sidebar_state="collapsed"
+    )
 
     # Include Google Analytics tracking code
     if config.google_analytics_id:
