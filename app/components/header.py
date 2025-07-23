@@ -47,6 +47,15 @@ def render_header(current_language=DEFAULT_LANGUAGE, on_language_change=None, se
         .header-banner { display: flex; justify-content: center; margin-bottom: 0.5em; }
         .header-search-row { display: flex; justify-content: center; margin-bottom: 1em; }
         .header-search-row input { font-size: 1.2em; padding: 0.7em; border-radius: 0.5em; }
+        /* Center align language buttons */         
+         .st-key-lang_he,
+         .st-key-lang_en,
+         .st-key-lang_fr,
+         .st-key-lang_ru{
+             text-align: center !important;
+             margin: 0 auto !important;
+         }
+
         @media (max-width: 640px) {
             .header-banner, .header-search-row { flex-direction: column; align-items: center; }
 
@@ -57,7 +66,7 @@ def render_header(current_language=DEFAULT_LANGUAGE, on_language_change=None, se
          div[data-testid="stColumn"]:has(div[data-testid="stVerticalBlock"]):has(div[class*="st-key-lang"]) {
              min-width: auto !important;
          }
-         
+                  
          /* Hide the parent container for this CSS-only markdown */
          div[data-testid="stElementContainer"]:has(.header-container1) {
              display: none !important;
