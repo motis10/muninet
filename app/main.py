@@ -253,7 +253,7 @@ def main():
                 
                 # Give localStorage time to save before rerunning
                 import time
-                time.sleep(0.2)  # 200ms delay
+                time.sleep(0.5)  # 200ms delay
                 st.rerun()
 
             def cancel_user():

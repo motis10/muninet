@@ -1,48 +1,96 @@
 # Application Design Specification
 
 ## 🎯 Design Overview
-This document bridges the gap between Architecture.md and actual implementation, providing detailed technical specifications for building the multilingual Streamlit application.
+This document bridges the gap between Architecture.md and actual implementation, providing detailed technical specifications for building the multilingual Streamlit application for Netanya Municipality with advanced URL parameter handling and enhanced user experience.
 
 ## 📁 Component Hierarchy
 
 ### Application Structure
 ```
 app/
-├── main.py                    # Application entry point
+├── main.py                    # Application entry point with URL parameter handling
 ├── components/                # UI Components
 │   ├── __init__.py
 │   ├── header.py             # Header with language selector, banner, search
 │   ├── grid_view.py          # Responsive grid for categories/street numbers
-│   ├── popups.py             # Data collection, success, error popups
-│   └── search.py             # Search functionality
+│   ├── popups.py             # Data collection, success, error popups with random data
+│   └── search.py             # Search functionality with auto-clearing
 ├── services/                 # Business Logic Services
 │   ├── __init__.py
 │   ├── supabase_service.py   # Database operations
-│   ├── api_service.py        # HTTP API integration
-│   └── storage_service.py    # Local storage management
+│   ├── api_service.py        # HTTP API integration with debug/release modes
+│   └── storage_service.py    # Local storage management with user data persistence
 ├── utils/                    # Utility Functions
 │   ├── __init__.py
 │   ├── models.py             # Data models and types
-│   ├── validation.py         # Input validation
-│   ├── i18n.py              # Internationalization
-│   └── helpers.py           # Helper functions
+│   ├── validation.py         # Israeli phone number validation
+│   ├── i18n.py              # Internationalization with Hebrew as default
+│   └── helpers.py           # Helper functions including URL parameter handling
 └── config/                  # Configuration
     ├── __init__.py
     ├── settings.py          # Environment and app settings
     └── constants.py         # Application constants
 ```
 
+## 🔗 URL Parameter System
+
+### URL Structure
+```
+https://app-url?category={id}&street={id}
+```
+
+### Parameter Handling Flow
+```python
+def handle_url_parameters():
+    """Handle URL parameters for direct navigation."""
+    query_params = st.query_params
+    category_id = query_params.get("category")
+    street_id = query_params.get("street")
+    
+    if category_id and street_id:
+        # Load user data
+        user_data = storage_service.load_user_data()
+        
+        if user_data:
+            # Direct navigation to summary page
+            category = supabase_service.get_category_by_id(int(category_id))
+            street = supabase_service.get_street_by_id(int(street_id))
+            
+            if category and street:
+                st.session_state.selected_category = category
+                st.session_state.selected_street = street
+                st.session_state.current_page = "summary"
+                
+                # Clear URL parameters after processing
+                clear_url_parameters()
+        else:
+            # User data required - show popup first
+            st.session_state.show_popup = True
+    
+    elif category_id:
+        # Navigate to streets page
+        category = supabase_service.get_category_by_id(int(category_id))
+        if category:
+            st.session_state.selected_category = category
+            st.session_state.current_page = "street_numbers"
+            clear_url_parameters()
+
+def clear_url_parameters():
+    """Clear URL parameters after processing."""
+    st.query_params.clear()
+```
+
 ## 🏗️ Data Models
 
-### Core Data Structures
+### Enhanced Data Structures
 ```python
 from dataclasses import dataclass
 from typing import List, Optional, Dict, Any
 from enum import Enum
 
 class Language(Enum):
+    HEBREW = "he"      # Default language
     ENGLISH = "en"
-    HEBREW = "he"
     FRENCH = "fr"
     RUSSIAN = "ru"
 
@@ -112,11 +160,12 @@ class AppState:
     show_popup: bool = False
     search_query: str = ""
     ticket_history: List[str] = []
+    url_params_processed: bool = False
 ```
 
-## 🔧 Service Layer Design
+## 🔧 Enhanced Service Layer Design
 
-### Supabase Service
+### Supabase Service with ID Lookups
 ```python
 class SupabaseService:
     def __init__(self, url: str, key: str):
@@ -128,6 +177,12 @@ class SupabaseService:
     def get_street_numbers(self) -> List[StreetNumber]:
         """Fetch all street numbers from database."""
         
+    def get_category_by_id(self, category_id: int) -> Optional[Category]:
+        """Get specific category by ID for URL parameter handling."""
+        
+    def get_street_by_id(self, street_id: int) -> Optional[StreetNumber]:
+        """Get specific street by ID for URL parameter handling."""
+        
     def search_categories(self, query: str) -> List[Category]:
         """Search categories by name."""
         
@@ -135,7 +190,7 @@ class SupabaseService:
         """Search street numbers by name."""
 ```
 
-### API Service
+### Enhanced API Service with Improved Error Handling
 ```python
 class APIService:
     def __init__(self, endpoint: str, debug_mode: bool = False):
@@ -145,20 +200,47 @@ class APIService:
     
     def submit_data(self, user_data: UserData, category: Category, street: StreetNumber) -> APIResponse:
         """Submit data to municipality API or mock service."""
+        payload = self._prepare_payload(user_data, category, street)
         
+        if self.debug_mode:
+            return self._mock_response()
+        
+        try:
+            response = self._send_request(payload)
+            return self._parse_response(response)
+        except Exception as e:
+            logger.error(f"API submission failed: {e}")
+            raise APIError(f"Failed to submit data: {e}")
+    
     def _prepare_payload(self, user_data: UserData, category: Category, street: StreetNumber) -> APIPayload:
         """Prepare API payload from user selections."""
         
-    def _get_headers(self) -> Dict[str, str]:
-        """Get required HTTP headers."""
+    def _send_request(self, payload: APIPayload) -> requests.Response:
+        """Send multipart/form-data request."""
+        
+    def _parse_response(self, response: requests.Response) -> APIResponse:
+        """Parse API response."""
         
     def _mock_response(self) -> APIResponse:
         """Generate mock response for debug mode."""
+        import random
+        mock_ticket = f"MOCK-{random.randint(1000, 9999)}"
+        return APIResponse(
+            ResultCode=200,
+            ErrorDescription="",
+            ResultStatus="SUCCESS CREATE",
+            ResultData={"incidentNumber": mock_ticket},
+            data=mock_ticket
+        )
 ```
 
-### Storage Service
+### Enhanced Storage Service
 ```python
 class StorageService:
+    LANGUAGE_KEY = "selected_language"
+    USER_DATA_KEY = "user_data"
+    TICKET_KEY = "ticket_history"
+    
     def save_user_data(self, user_data: UserData) -> None:
         """Save user data to localStorage."""
         
@@ -166,10 +248,15 @@ class StorageService:
         """Load user data from localStorage."""
         
     def save_language(self, language: Language) -> None:
-        """Save language preference."""
+        """Save language preference (defaults to Hebrew)."""
         
     def load_language(self) -> Language:
-        """Load language preference."""
+        """Load language preference (defaults to Hebrew)."""
+        try:
+            lang_code = self.local_storage.getItem(self.LANGUAGE_KEY) or "he"
+            return Language(lang_code)
+        except:
+            return Language.HEBREW  # Default to Hebrew
         
     def save_ticket(self, ticket_number: str) -> None:
         """Save ticket number to history."""
@@ -178,14 +265,17 @@ class StorageService:
         """Get ticket history."""
         
     def clear_user_data(self) -> None:
-        """Clear all user data."""
+        """Clear user data only (preserve language and tickets)."""
+        
+    def generate_random_user_data(self) -> UserData:
+        """Generate random Hebrew user data for development."""
+        # Implementation with Hebrew names and transliteration
 ```
 
-## 🧪 State Management
+## 🧪 Enhanced State Management
 
-### Session State Structure
+### Enhanced Session State Structure
 ```python
-# Streamlit session state keys
 SESSION_KEYS = {
     'current_page': 'categories',
     'selected_category': None,
@@ -194,45 +284,52 @@ SESSION_KEYS = {
     'search_query': '',
     'ticket_history': [],
     'user_data': None,
-    'current_language': 'en'
+    'current_language': 'he',  # Default to Hebrew
+    'url_params_processed': False,
+    'show_success_toast': False,
+    'last_ticket_number': None
 }
 ```
 
-### State Initialization
+### Enhanced State Transitions
 ```python
-def init_session_state():
-    """Initialize all session state variables."""
-    if 'current_page' not in st.session_state:
-        st.session_state.current_page = 'categories'
-    if 'selected_category' not in st.session_state:
-        st.session_state.selected_category = None
-    # ... initialize all other keys
-```
-
-### State Transitions
-```python
-def navigate_to_page(page: Page):
-    """Navigate to specified page."""
+def navigate_to_page(page: Page, clear_search: bool = True):
+    """Navigate to specified page with optional search clearing."""
     st.session_state.current_page = page.value
+    if clear_search:
+        st.session_state.search_query = ""  # Clear search on navigation
     st.rerun()
 
 def select_category(category: Category):
-    """Handle category selection."""
+    """Handle category selection with URL parameter support."""
     st.session_state.selected_category = category
-    user_data = storage_service.load_user_data()
+    st.session_state.search_query = ""  # Clear search
     
+    user_data = storage_service.load_user_data()
     if user_data is None:
         st.session_state.show_popup = True
     else:
         navigate_to_page(Page.STREET_NUMBERS)
+
+def select_street(street: StreetNumber):
+    """Handle street selection."""
+    st.session_state.selected_street = street
+    st.session_state.search_query = ""  # Clear search
+    navigate_to_page(Page.SUMMARY)
+
+def show_success_notification(ticket_number: str):
+    """Show success toast notification."""
+    st.session_state.show_success_toast = True
+    st.session_state.last_ticket_number = ticket_number
+    storage_service.save_ticket(ticket_number)
 ```
 
-## 🎨 UI/UX Component Design
+## 🎨 Enhanced UI/UX Component Design
 
-### Header Component
+### Header Component with Auto-clearing Search
 ```python
 def render_header():
-    """Render header with banner, language selector, and search."""
+    """Render header with banner, language selector, and auto-clearing search."""
     col1, col2, col3 = st.columns([2, 1, 1])
     
     with col1:
@@ -242,82 +339,161 @@ def render_header():
         render_language_selector()
     
     with col3:
-        render_search_box()
+        render_search_box_with_clearing()
     
     apply_rtl_styling()
+
+def render_search_box_with_clearing():
+    """Render search box that clears automatically on navigation."""
+    search_query = st.text_input(
+        t("common.search"),
+        value=st.session_state.get("search_query", ""),
+        key="search_input",
+        placeholder=t("common.search_placeholder")
+    )
+    
+    # Update session state if search changed
+    if search_query != st.session_state.get("search_query", ""):
+        st.session_state.search_query = search_query
+        st.rerun()
 ```
 
-### Grid View Component
+### Enhanced Grid View Component
 ```python
 def create_grid_view(
     items: List[Union[Category, StreetNumber]],
     on_item_click: Callable,
     search_query: str = ""
 ) -> None:
-    """Create responsive grid view."""
+    """Create responsive grid view with enhanced interactions."""
     filtered_items = filter_items(items, search_query)
-    cols_per_row = calculate_responsive_columns()
     
+    if not filtered_items:
+        st.info(t("common.no_results"))
+        return
+    
+    cols_per_row = calculate_responsive_columns()
     cols = st.columns(cols_per_row)
+    
     for idx, item in enumerate(filtered_items):
         with cols[idx % cols_per_row]:
-            render_grid_item(item, on_item_click)
+            render_enhanced_grid_item(item, on_item_click)
+
+def render_enhanced_grid_item(item: Union[Category, StreetNumber], on_click: Callable):
+    """Render grid item with enhanced visual feedback."""
+    # Custom styling for better interaction
+    st.markdown("""
+    <style>
+    .grid-item-button {
+        width: 100%;
+        height: auto;
+        min-height: 120px;
+        margin: 5px 0;
+        border-radius: 10px;
+        border: 2px solid #e0e0e0;
+        transition: all 0.3s ease;
+    }
+    .grid-item-button:hover {
+        border-color: #1f77b4;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    if st.button(
+        f"🖼️ {item.name}",
+        key=f"item_{item.id}",
+        use_container_width=True,
+        help=getattr(item, 'text', '')
+    ):
+        on_click(item)
 ```
 
-### Popup Components
+### Enhanced Popup Components with Random Data
 ```python
-def show_data_collection_popup(on_save: Callable, on_cancel: Callable):
-    """Show user data collection popup."""
-    with st.form("user_data_form"):
-        first_name = st.text_input(t("first_name"), max_chars=35, autocomplete="given-name")
-        last_name = st.text_input(t("last_name"), max_chars=35, autocomplete="family-name")
-        user_id = st.text_input(t("id"), max_chars=12, autocomplete="off")
-        phone = st.text_input(t("phone"), max_chars=15, autocomplete="tel")
-        email = st.text_input(t("email"), autocomplete="email")
+def show_data_collection_popup(on_save: Callable, on_cancel: Callable, lang="he"):
+    """Show user data collection popup with pre-filled random Hebrew data."""
+    st.markdown(f"### {t('common.save', lang)}")
+    st.markdown(f"<span style='color: red;'>* {t('common.one_time', lang)}</span>", 
+                unsafe_allow_html=True)
+
+    # Generate random Hebrew user data for development
+    user = generate_random_user_data()
+    
+    with st.form("user_data_form", clear_on_submit=False):
+        first_name = st.text_input(
+            t("forms.first_name", lang), 
+            key="popup_first_name", 
+            value=user.first_name,
+            max_chars=35,
+            autocomplete="given-name"
+        )
+        last_name = st.text_input(
+            t("forms.last_name", lang), 
+            key="popup_last_name", 
+            value=user.last_name,
+            max_chars=35,
+            autocomplete="family-name"
+        )
+        phone = st.text_input(
+            t("forms.phone", lang), 
+            key="popup_phone", 
+            value="",
+            max_chars=15,
+            autocomplete="tel",
+            help=t("forms.phone_help", lang)
+        )
+        email = st.text_input(
+            t("forms.email", lang), 
+            key="popup_email", 
+            value=user.email,
+            autocomplete="email"
+        )
+        user_id = st.text_input(
+            t("forms.id_optional", lang), 
+            key="popup_id",
+            max_chars=12,
+            autocomplete="off"
+        )
         
         col1, col2 = st.columns(2)
         with col1:
-            if st.form_submit_button(t("save")):
-                handle_save_data(first_name, last_name, user_id, phone, email, on_save)
+            if st.form_submit_button(t("common.save", lang), use_container_width=True):
+                if handle_save_data(first_name, last_name, user_id, phone, email, on_save, lang):
+                    return
         with col2:
-            if st.form_submit_button(t("cancel")):
+            if st.form_submit_button(t("common.cancel", lang), use_container_width=True):
                 on_cancel()
 
-def show_success_popup(ticket_number: str, on_restart: Callable):
-    """Show success popup with ticket number."""
-    st.success(t("success_message", ticket_number=ticket_number))
-    if st.button(t("start_over")):
-        on_restart()
+def show_success_toast(ticket_number: str, lang="he"):
+    """Show success toast notification."""
+    success_message = t("messages.success_message", lang).format(ticket_number=ticket_number)
+    st.success(success_message)
+    
+    # Auto-clear toast after display
+    if st.session_state.get("show_success_toast"):
+        st.session_state.show_success_toast = False
 
-def show_error_popup(on_restart: Callable):
-    """Show error popup."""
-    st.error(t("error_message"))
-    if st.button(t("try_again")):
+def show_error_popup(on_restart: Callable, lang="he"):
+    """Show error popup with restart option."""
+    st.error(t("messages.error_message", lang))
+    if st.button(t("common.try_again", lang), use_container_width=True):
         on_restart()
 ```
 
-## 📱 Mobile Responsive Design
+## 📱 Enhanced Mobile Responsive Design
 
-### Responsive Breakpoints
+### Enhanced Responsive Breakpoints
 ```python
-# CSS breakpoints for responsive design
 BREAKPOINTS = {
-    'mobile': 768,    # 1-2 items per row
+    'mobile': 768,    # 1-2 items per row, larger touch targets
     'tablet': 1024,   # 2-3 items per row
     'desktop': 1200   # 3-4 items per row
 }
 
-def calculate_responsive_columns() -> int:
-    """Calculate number of columns based on screen width."""
-    # This will be implemented with CSS media queries
-    # and JavaScript detection
-    return 3  # Default for desktop
-```
-
-### Mobile-Specific Styling
-```python
-def apply_mobile_styling():
-    """Apply mobile-specific CSS."""
+def apply_mobile_optimizations():
+    """Apply comprehensive mobile optimizations."""
     st.markdown("""
     <style>
     @media (max-width: 768px) {
@@ -326,82 +502,118 @@ def apply_mobile_styling():
             height: 60px;
             font-size: 18px;
             margin: 10px 0;
+            border-radius: 10px;
+            touch-action: manipulation;
         }
         
         .grid-item {
-            margin: 10px 0;
-            padding: 15px;
+            margin: 15px 0;
+            padding: 20px;
+            min-height: 100px;
         }
         
         .search-input {
             font-size: 16px;
-            padding: 12px;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .popup-form {
+            padding: 20px;
+            font-size: 16px;
+        }
+        
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            padding: 15px;
+            border-radius: 8px;
+            background: #4CAF50;
+            color: white;
+            font-weight: bold;
         }
     }
     </style>
     """, unsafe_allow_html=True)
 ```
 
-### Touch-Friendly Interactions
-- Minimum touch target size: 44px × 44px
-- Adequate spacing between interactive elements
-- Large, readable fonts
-- Swipe gestures for navigation (future enhancement)
+## 🌍 Enhanced Internationalization Design
 
-## 🌍 Internationalization Design
-
-### Translation File Structure
+### Updated Translation File Structure with Hebrew Default
 ```
 assets/translations/
+├── he.json (default)
 ├── en.json
-├── he.json
 ├── fr.json
 └── ru.json
 ```
 
-### Translation File Format
+### Enhanced Translation File Format
 ```json
 {
   "common": {
-    "welcome": "Welcome",
-    "search": "Search",
-    "save": "Save",
-    "cancel": "Cancel",
-    "start_over": "Start Over",
-    "try_again": "Try Again"
+    "welcome": "ברוכים הבאים",
+    "search": "חיפוש",
+    "search_placeholder": "חפש כאן...",
+    "save": "שמור",
+    "cancel": "בטל",
+    "start_over": "התחל מחדש",
+    "try_again": "נסה שוב",
+    "no_results": "לא נמצאו תוצאות",
+    "one_time": "הנתונים יישמרו מקומית פעם אחת בלבד"
   },
   "forms": {
-    "first_name": "First Name",
-    "last_name": "Last Name",
-    "id": "ID Number",
-    "phone": "Phone Number",
-    "email": "Email (Optional)"
+    "first_name": "שם פרטי",
+    "last_name": "שם משפחה",
+    "id_optional": "תעודת זהות (אופציונלי)",
+    "phone": "טלפון",
+    "phone_help": "מספר טלפון ישראלי בלבד",
+    "email": "דוא\"ל (אופציונלי)"
   },
   "messages": {
-    "success_message": "Your request has been submitted successfully. Ticket number: {ticket_number}",
-    "error_message": "Failed, please try again",
-    "save_locally": "Your data will be saved locally only"
+    "success_message": "הבקשה נשלחה בהצלחה. מספר קריאה: {ticket_number}",
+    "error_message": "שליחה נכשלה, אנא נסה שוב",
+    "save_locally": "הנתונים יישמרו מקומית בלבד"
   },
   "validation": {
-    "name_required": "Name is required",
-    "name_too_long": "Name must be 35 characters or less",
-    "id_invalid": "ID must contain only numbers",
-    "phone_invalid": "Phone must contain only numbers",
-    "email_invalid": "Invalid email format"
+    "name_required": "שם נדרש",
+    "name_too_long": "השם חייב להיות עד 35 תווים",
+    "id_invalid": "תעודת זהות חייבת להכיל ספרות בלבד",
+    "phone_invalid": "מספר טלפון לא תקין",
+    "phone_israeli": "אנא הזן מספר טלפון ישראלי תקין",
+    "email_invalid": "פורמט דוא\"ל לא תקין"
+  },
+  "pages": {
+    "categories": "קטגוריות",
+    "street_numbers": "מספרי בית",
+    "summary": "סיכום"
   }
 }
 ```
 
-### RTL Support Implementation
+### Enhanced RTL Support
 ```python
 def apply_rtl_styling(language: Language):
-    """Apply RTL styling for Hebrew."""
+    """Apply comprehensive RTL styling for Hebrew."""
     if language == Language.HEBREW:
         st.markdown("""
         <style>
         .stApp {
             direction: rtl;
             text-align: right;
+            font-family: 'Arial', 'Helvetica', sans-serif;
+        }
+        
+        .stTextInput > div > div > input {
+            text-align: right;
+            direction: rtl;
+        }
+        
+        .stButton > button {
+            direction: rtl;
         }
         
         .language-selector {
@@ -411,234 +623,181 @@ def apply_rtl_styling(language: Language):
         .search-container {
             flex-direction: row-reverse;
         }
+        
+        .grid-container {
+            direction: rtl;
+        }
+        
+        .popup-content {
+            direction: rtl;
+            text-align: right;
+        }
         </style>
         """, unsafe_allow_html=True)
 ```
 
-## 🚨 Error Handling Design
+## 🔧 Enhanced Validation System
 
-### Error Hierarchy
+### Israeli Phone Number Validation
 ```python
-class AppError(Exception):
-    """Base application error."""
-    pass
-
-class ValidationError(AppError):
-    """Validation error."""
-    pass
-
-class APIError(AppError):
-    """API communication error."""
-    pass
-
-class DatabaseError(AppError):
-    """Database operation error."""
-    pass
-```
-
-### Error Handling Strategy
-```python
-def handle_api_error(error: Exception) -> None:
-    """Handle API errors gracefully."""
-    if isinstance(error, requests.exceptions.ConnectionError):
-        st.error(t("network_error"))
-    elif isinstance(error, requests.exceptions.Timeout):
-        st.error(t("timeout_error"))
-    else:
-        st.error(t("api_error"))
+def validate_israeli_phone(phone: str) -> ValidationResult:
+    """Validate Israeli phone numbers."""
+    errors = []
     
-    # Log error for debugging
-    logger.error(f"API Error: {error}")
-
-def handle_validation_error(errors: List[str]) -> None:
-    """Handle validation errors."""
-    for error in errors:
-        st.error(t(error))
-
-def handle_database_error(error: Exception) -> None:
-    """Handle database errors."""
-    st.error(t("database_error"))
-    logger.error(f"Database Error: {error}")
-```
-
-## 🧪 Testing Architecture
-
-### Test Structure
-```
-tests/
-├── unit/
-│   ├── test_validation.py
-│   ├── test_i18n.py
-│   ├── test_models.py
-│   └── test_helpers.py
-├── integration/
-│   ├── test_supabase_service.py
-│   ├── test_api_service.py
-│   └── test_storage_service.py
-├── e2e/
-│   ├── test_new_user_flow.py
-│   ├── test_existing_user_flow.py
-│   └── test_error_scenarios.py
-└── conftest.py
-```
-
-### Test Examples
-```python
-# Unit test example
-def test_validate_user_data_success():
-    user_data = UserData(
-        first_name="John",
-        last_name="Doe",
-        user_id="123456789",
-        phone="1234567890",
-        email="john@example.com"
-    )
-    result = validate_user_data(user_data)
-    assert result.is_valid == True
-    assert len(result.errors) == 0
-
-# Integration test example
-def test_api_submission_success(mock_api_service):
-    user_data = create_test_user_data()
-    category = create_test_category()
-    street = create_test_street()
+    # Remove spaces and dashes
+    cleaned_phone = re.sub(r'[\s\-]', '', phone)
     
-    response = mock_api_service.submit_data(user_data, category, street)
-    assert response.ResultCode == 200
-    assert "SUCCESS" in response.ResultStatus
+    # Check if only digits
+    if not cleaned_phone.isdigit():
+        errors.append("phone_invalid")
+        return ValidationResult(False, errors)
+    
+    # Israeli phone number patterns
+    israeli_patterns = [
+        r'^0[2-4,8-9]\d{7}$',      # Landline: 02/03/04/08/09 + 7 digits
+        r'^05[0-9]\d{7}$',         # Mobile: 05X + 7 digits
+        r'^07[2-9]\d{7}$',         # Special services
+    ]
+    
+    is_valid = any(re.match(pattern, cleaned_phone) for pattern in israeli_patterns)
+    
+    if not is_valid:
+        errors.append("phone_israeli")
+    
+    return ValidationResult(is_valid, errors)
 
-# E2E test example
-def test_new_user_complete_flow():
-    # Simulate new user flow from start to finish
-    # This would use Streamlit's testing framework
-    pass
+def validate_user_data(user_data: UserData, lang: str = "he") -> ValidationResult:
+    """Enhanced validation with Israeli specifics."""
+    errors = []
+    
+    # Name validation
+    if not user_data.first_name.strip():
+        errors.append("name_required")
+    elif len(user_data.first_name) > 35:
+        errors.append("name_too_long")
+    
+    if not user_data.last_name.strip():
+        errors.append("name_required")
+    elif len(user_data.last_name) > 35:
+        errors.append("name_too_long")
+    
+    # Phone validation (Israeli specific)
+    phone_result = validate_israeli_phone(user_data.phone)
+    errors.extend(phone_result.errors)
+    
+    # ID validation (optional)
+    if user_data.user_id and not user_data.user_id.isdigit():
+        errors.append("id_invalid")
+    
+    # Email validation (optional)
+    if user_data.email and not re.match(r'^[^@]+@[^@]+\.[^@]+$', user_data.email):
+        errors.append("email_invalid")
+    
+    return ValidationResult(len(errors) == 0, errors)
 ```
 
-## 📋 Data Flow Design
+## 📋 Enhanced Data Flow Design
 
-### Application Initialization Flow
+### Application Initialization with URL Parameters
 ```
-1. Load environment variables
+1. Load environment variables and configuration
 2. Initialize services (Supabase, API, Storage)
-3. Load user data from localStorage
-4. Set language preference
-5. Load categories from database
-6. Initialize session state
-7. Render appropriate page
+3. Check for URL parameters and process them
+4. Load user data from localStorage
+5. Set language preference (default: Hebrew)
+6. Load categories and streets from database
+7. Initialize session state with URL parameter data
+8. Clear URL parameters after processing
+9. Render appropriate page based on state
 ```
 
-### User Interaction Flow
+### Enhanced User Interaction Flow
 ```
-1. User clicks category
-2. Check if user data exists
-3. If new user: show data collection popup
-4. If existing user: navigate to street numbers
-5. User selects street number
-6. Navigate to summary page
-7. User clicks SEND
-8. Submit to API (real or mock)
-9. Handle response and show appropriate popup
-10. Restart flow
+1. URL Parameter Processing:
+   - Check for category and street parameters
+   - Validate user data exists for direct summary navigation
+   - Clear parameters after processing
+
+2. Category Selection:
+   - Clear search query automatically
+   - Check user data existence
+   - Show popup for new users or navigate for existing users
+
+3. Street Selection:
+   - Clear search query automatically
+   - Navigate to summary page
+
+4. API Submission:
+   - Submit via multipart/form-data
+   - Handle response with toast notifications
+   - Save ticket to history
+   - Restart flow to categories
+
+5. Search Functionality:
+   - Auto-clear on page navigation
+   - Real-time filtering
+   - Multilingual support
 ```
 
-### Error Recovery Flow
-```
-1. Detect error (validation, API, network)
-2. Log error for debugging
-3. Display user-friendly error message
-4. Provide recovery options
-5. Allow user to retry or restart
-```
+## 🚀 Enhanced Performance Considerations
 
-## 🚀 Performance Considerations
-
-### Caching Strategy
-- Cache Supabase data in session state
-- Cache translations in memory
-- Cache user data in localStorage
-- Implement lazy loading for images
-
-### Optimization Techniques
-- Debounced search input
-- Efficient grid rendering
+### Advanced Caching Strategy
+- Session state caching for database data
+- Translation file caching
+- User data persistence optimization
+- Debounced search with 300ms delay
+- Lazy loading for images
 - Connection pooling for API calls
-- Minimal re-renders with state management
 
-## 🔧 Configuration Management
+### URL Parameter Optimization
+- Single-pass parameter processing
+- Efficient state updates
+- Minimal re-renders on parameter changes
+- Smart parameter clearing
 
-### Environment Configuration
-```python
-@dataclass
-class AppConfig:
-    # Supabase configuration
-    supabase_url: str
-    supabase_key: str
-    
-    # API configuration
-    api_endpoint: str
-    api_timeout: int = 30
-    
-    # Application mode
-    debug_mode: bool = False
-    app_mode: str = "release"
-    
-    # Feature flags
-    enable_file_upload: bool = False
-    enable_ticket_history: bool = True
-```
+## 📋 Updated Implementation Checklist
 
-### Configuration Loading
-```python
-def load_config() -> AppConfig:
-    """Load configuration from environment variables."""
-    return AppConfig(
-        supabase_url=os.getenv("SUPABASE_URL"),
-        supabase_key=os.getenv("SUPABASE_KEY"),
-        api_endpoint=os.getenv("API_ENDPOINT"),
-        debug_mode=os.getenv("DEBUG", "False").lower() == "true",
-        app_mode=os.getenv("APP_MODE", "debug")
-    )
-```
+### Phase 1: Foundation ✅
+- [x] Project structure setup
+- [x] Configuration system with debug/release modes
+- [x] Enhanced data models
+- [x] URL parameter handling utilities
 
-## 📋 Implementation Checklist
+### Phase 2: Core Services ✅
+- [x] Supabase service with ID lookups
+- [x] API service with mock support
+- [x] Storage service with persistence
+- [x] Enhanced validation system
 
-### Phase 1: Foundation
-- [ ] Project structure setup
-- [ ] Configuration system
-- [ ] Data models
-- [ ] Basic utilities
+### Phase 3: UI Components ✅
+- [x] Header component with auto-clearing search
+- [x] Enhanced grid view component
+- [x] Popup components with random data
+- [x] Toast notification system
 
-### Phase 2: Core Services
-- [ ] Supabase service
-- [ ] API service (with mock support)
-- [ ] Storage service
-- [ ] Validation system
+### Phase 4: Internationalization ✅
+- [x] Translation system with Hebrew default
+- [x] Comprehensive RTL support
+- [x] Language switching and persistence
 
-### Phase 3: UI Components
-- [ ] Header component
-- [ ] Grid view component
-- [ ] Popup components
-- [ ] Search functionality
+### Phase 5: Main Application ✅
+- [x] Enhanced state management
+- [x] URL parameter-aware routing
+- [x] Complete user flows
+- [x] Advanced error handling
 
-### Phase 4: Internationalization
-- [ ] Translation system
-- [ ] RTL support
-- [ ] Language switching
+### Phase 6: Mobile Optimization ✅
+- [x] Responsive design
+- [x] Touch-friendly interactions
+- [x] Mobile-specific styling
+- [x] Toast notifications
 
-### Phase 5: Main Application
-- [ ] State management
-- [ ] Page routing
-- [ ] User flows
-- [ ] Error handling
+### Phase 7: Advanced Features ✅
+- [x] URL parameter system
+- [x] Search box auto-clearing
+- [x] Israeli phone validation
+- [x] Random Hebrew data generation
+- [x] Toast success notifications
+- [x] Debug/release mode switching
 
-### Phase 6: Testing
-- [ ] Unit tests
-- [ ] Integration tests
-- [ ] E2E tests
-
-### Phase 7: Mobile Optimization
-- [ ] Responsive design
-- [ ] Touch-friendly interactions
-- [ ] Mobile-specific styling
-
-This design specification provides a complete technical blueprint for implementing the multilingual Streamlit application according to the architecture and requirements. 
+This enhanced design specification provides a complete technical blueprint for the fully-featured multilingual Streamlit application with advanced URL parameter handling, auto-clearing search, Hebrew as default language, and comprehensive mobile optimization. 
