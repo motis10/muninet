@@ -39,6 +39,36 @@ def render_header(current_language=DEFAULT_LANGUAGE, on_language_change=None, se
     st.markdown(
         """
         <style>
+        /* Force light theme - override dark mode */
+        .stApp {
+            background-color: white !important;
+            color: black !important;
+        }
+        
+        .main .block-container {
+            background-color: white !important;
+            color: black !important;
+        }
+        
+        /* Override dark mode for specific elements */
+        .stMarkdown, .stText, .stButton button, .stTextInput input, .stSelectbox select {
+            background-color: white !important;
+            color: black !important;
+        }
+        
+        /* Ensure buttons and inputs stay light */
+        button[data-testid="stBaseButton-secondary"] {
+            background-color: #f0f2f6 !important;
+            color: black !important;
+            border: 1px solid #ddd !important;
+        }
+        
+        input[type="text"] {
+            background-color: white !important;
+            color: black !important;
+            border: 1px solid #ddd !important;
+        }
+        
         /* Remove default Streamlit padding/margin from top */
         .main .block-container { padding-top: 0rem; padding-bottom: 0rem; }
         .stApp > header { height: 0rem; }
