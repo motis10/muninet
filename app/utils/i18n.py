@@ -31,12 +31,12 @@ def get_fallback_translations(lang):
                 "save": "שמור",
                 "send": "שלח",
                 "cancel": "ביטול",
-                "one_time": "יש למלא פרטים אישיים פעם אחת בלבד",
+                "one_time": "יש למלא פעם אחת בלבד העיריה חוזרת טלפונית",
                 "ticket_history": "היסטוריית תקלות"
             },
             "forms": {
-                "first_name": "שם פרטי",
-                "last_name": "שם משפחה",
+                "first_name": "שם פרטי פיקטיבי (לא חובה)",
+                "last_name": "שם משפחה פיקטיבי (לא חובה)",
                 "phone": "טלפון",
                 "email": "אימייל - לא חובה",
                 "id_optional": "תז - לא חובה",
@@ -63,12 +63,12 @@ def get_fallback_translations(lang):
                 "save": "Save",
                 "send": "Send",
                 "cancel": "Cancel",
-                "one_time": "Fill it one time only",
+                "one_time": "Fill it one time only the city will call you",
                 "ticket_history": "Ticket History"
             },
             "forms": {
-                "first_name": "First Name",
-                "last_name": "Last Name",
+                "first_name": "First Name (Optional)",
+                "last_name": "Last Name (Optional)",
                 "phone": "Phone Number",
                 "email": "Email (Optional)",
                 "id_optional": "ID Number (Optional)",
@@ -95,12 +95,12 @@ def get_fallback_translations(lang):
                 "save": "Sauvegarder",
                 "send": "Envoyer",
                 "cancel": "Annuler",
-                "one_time": "Remplir une seule fois",
+                "one_time": "Remplir une seule fois la ville vous appellera",
                 "ticket_history": "Historique des tickets"
             },
             "forms": {
-                "first_name": "Prénom",
-                "last_name": "Nom de famille",
+                "first_name": "Prénom (Optionnel)",
+                "last_name": "Nom de famille (Optionnel)",
                 "phone": "Numéro de téléphone",
                 "email": "Email (Optionnel)",
                 "id_optional": "Numéro d'identité (Optionnel)",
@@ -127,12 +127,12 @@ def get_fallback_translations(lang):
                 "save": "Сохранить",
                 "send": "Отправить",
                 "cancel": "Отмена",
-                "one_time": "Заполните только один раз",
+                "one_time": "Заполните только один раз город вам перезвонит",
                 "ticket_history": "История заявок"
             },
             "forms": {
-                "first_name": "Имя",
-                "last_name": "Фамилия",
+                "first_name": "Имя (Необязательно)",
+                "last_name": "Фамилия (Необязательно)",
                 "phone": "Номер телефона",
                 "email": "Email (Необязательно)",
                 "id_optional": "Номер удостоверения (Необязательно)",

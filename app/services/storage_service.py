@@ -82,6 +82,16 @@ class StorageService:
         
         print("❌ No user data found")
         return None
+        # print("❌ No user data found - generating random user data")
+        # # Generate random user data as fallback
+        # random_user = self._generate_random_user_data()
+        
+        # # Save the generated data for future use
+        # self.save_user_data(random_user)
+        
+        # print(f"✅ Generated random user: {random_user.first_name} {random_user.last_name}")
+        # return (random_user)
+
 
     def save_language(self, language: str):
         """Save language preference to browser localStorage or session state."""
@@ -153,7 +163,6 @@ class StorageService:
         
         # Fallback to session state
         data = st.session_state.get(self.TICKET_KEY, [])
-        print(f"DEBUG2: Ticket history from session state: {data}")
         return data if isinstance(data, list) else []
 
     def clear_user_data(self):

@@ -4,15 +4,15 @@
     "search": "Search",
     "save": "Save",
     "send": "Отправить",
-    "one_time": "Fill it one time only",
+    "one_time": "Fill it one time only the city will call you in 24 hours",
     "cancel": "Cancel",
     "start_over": "Start Over",
     "try_again": "Try Again",
     "ticket_history": "Ticket History"
   },
   "forms": {
-    "first_name": "Имя",
-    "last_name": "Фамилия",
+    "first_name": "Имя (Необязательно)",
+    "last_name": "Фамилия (Необязательно)",
     "id": "Номер удостоверения",
     "id_optional": "Номер удостоверения (Необязательно)",
     "phone": "Номер телефона",

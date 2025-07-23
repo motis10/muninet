@@ -209,13 +209,22 @@ def main():
         if not categories:
             st.warning("No categories found in Supabase.")
         def on_category_click(category):
+            print(f"DEBUG: Category clicked: {category.name}")
+            print(f"DEBUG: Current user_data: {st.session_state.user_data}")
+            print(f"DEBUG: Current selected_street: {st.session_state.selected_street}")
+            
             st.session_state.selected_category = category
+            # Clear selected street when selecting a new category
+            st.session_state.selected_street = None
             # Clear custom text when switching categories (will be regenerated in summary)
             st.session_state.custom_text = ""
             if not st.session_state.user_data:
+                print("DEBUG: No user data, showing popup")
                 st.session_state.show_popup = True
                 st.rerun()
             else:
+                print("DEBUG: User data exists, going to streets page")
+                # Always go to streets page after selecting category (need to select street too)
                 st.session_state.current_page = "streets"
                 st.session_state.search_query = ""
                 # Clear the search input when changing pages

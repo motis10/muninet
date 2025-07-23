@@ -4,15 +4,15 @@
     "search": "Search",
     "save": "Save",
     "send": "Envoyer",
-    "one_time": "Fill it one time only",
+    "one_time": "Fill it one time only the city will call you",
     "cancel": "Cancel",
     "start_over": "Start Over",
     "try_again": "Try Again",
     "ticket_history": "Ticket History"
   },
   "forms": {
-    "first_name": "Prénom",
-    "last_name": "Nom de famille",
+    "first_name": "Prénom (Optionnel)",
+    "last_name": "Nom de famille (Optionnel)",
     "id": "Numéro d'identité",
     "id_optional": "Numéro d'identité (Optionnel)",
     "phone": "Numéro de téléphone",
