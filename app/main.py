@@ -315,7 +315,7 @@ def main():
                     st.session_state.custom_text = custom_text
         
         # Future-proof: file upload (disabled for now)
-        uploaded_file = st.file_uploader("Upload a file (optional, not sent yet)", disabled=True)
+        # uploaded_file = st.file_uploader("Upload a file (optional, not sent yet)", disabled=True)
         if st.button(t('common.send', lang), type="primary"):
             # To enable file upload in the future, pass extra_files to api.submit_data
             extra_files = None
@@ -325,7 +325,7 @@ def main():
             # Pass custom text to API service
             custom_text = st.session_state.get("custom_text", "")
             
-            response = api.submit_data(user, category, street, custom_text=custom_text, extra_files=extra_files)
+            response = api.submit_data(user, category, street, custom_text=custom_text, extra_files=None)
             if response.ResultCode == 200 and "SUCCESS" in response.ResultStatus:
                 ticket = response.data
                 st.session_state.ticket_history.append(ticket)
