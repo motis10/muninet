@@ -8,7 +8,7 @@ try:
 except ImportError:
     from utils.i18n import t
 
-def create_grid_view(items, on_item_click, search_query="", search_fn: Callable = None, language="he"):
+def create_grid_view(items, on_item_click, search_query="", search_fn: Callable = None, language="he", page_key="default"):
     if search_fn:
         items = search_fn(search_query)
     else:
@@ -27,7 +27,7 @@ def create_grid_view(items, on_item_click, search_query="", search_fn: Callable 
         images=images,
         max_cols=2,
         gap=10,
-        key="gallery"
+        key=f"gallery_{page_key}"
     )
 
     if clicked_index is not None:

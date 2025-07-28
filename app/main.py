@@ -218,6 +218,8 @@ def main():
             st.session_state.selected_street = None
             # Clear custom text when switching categories (will be regenerated in summary)
             st.session_state.custom_text = ""
+            # Mark that we've manually selected, not from URL params
+            st.session_state.url_params_processed = True
             if not st.session_state.user_data:
                 print("DEBUG: No user data, showing popup")
                 st.session_state.show_popup = True
@@ -237,12 +239,22 @@ def main():
                 storage.save_user_data(user)
                 st.session_state.show_popup = False
                 
+                # Debug: Check current state
+                print(f"DEBUG save_user: selected_category = {st.session_state.selected_category}")
+                print(f"DEBUG save_user: selected_street = {st.session_state.selected_street}")
+                print(f"DEBUG save_user: selected_category is None? {st.session_state.selected_category is None}")
+                print(f"DEBUG save_user: selected_street is None? {st.session_state.selected_street is None}")
+                print(f"DEBUG save_user: bool(selected_category) = {bool(st.session_state.selected_category)}")
+                print(f"DEBUG save_user: bool(selected_street) = {bool(st.session_state.selected_street)}")
+                
                 # Check if we already have both category and street selected (from URL params)
                 if st.session_state.selected_category and st.session_state.selected_street:
                     # Both are selected, go directly to summary
+                    print("DEBUG save_user: Both category and street selected, going to summary")
                     st.session_state.current_page = "summary"
                 else:
                     # Need to select street, go to streets page
+                    print("DEBUG save_user: Missing street, going to streets page")
                     st.session_state.current_page = "streets"
                 
                 st.session_state.search_query = ""
@@ -267,7 +279,7 @@ def main():
                 st.rerun()
             show_data_collection_popup(save_user, cancel_user, lang=lang)
         else:
-            create_grid_view(categories, on_category_click, search_query=st.session_state.search_query, search_fn=supabase.search_categories)
+            create_grid_view(categories, on_category_click, search_query=st.session_state.search_query, search_fn=supabase.search_categories, page_key="categories")
     elif st.session_state.current_page == "streets":
         if not streets:
             st.warning("No street numbers found in Supabase.")
@@ -279,7 +291,7 @@ def main():
             if "header_search_input" in st.session_state:
                 del st.session_state["header_search_input"]
             st.rerun()  # <-- This line is necessary for immediate navigation
-        create_grid_view(streets, on_street_click, search_query=st.session_state.search_query, search_fn=supabase.search_street_numbers)
+        create_grid_view(streets, on_street_click, search_query=st.session_state.search_query, search_fn=supabase.search_street_numbers, page_key="streets")
     elif st.session_state.current_page == "summary":
         user = st.session_state.user_data
         category = st.session_state.selected_category

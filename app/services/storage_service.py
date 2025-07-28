@@ -153,7 +153,6 @@ class StorageService:
         if HAS_LOCAL_STORAGE and self.local_storage:
             try:
                 data = self.local_storage.getItem(self.TICKET_KEY)
-                print(f"DEBUG: Ticket history from localStorage: {data}")
                 if data:
                     # localStorage stores as JSON string, parse to get the list
                     parsed = json.loads(data)
