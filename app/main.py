@@ -198,7 +198,9 @@ def main():
 
     # Real-time search: Check if search input has changed and update immediately
     current_search_input = st.session_state.get("header_search_input", "")
+    print(f"DEBUG search: current_search_input='{current_search_input}', session_search_query='{st.session_state.search_query}'")
     if current_search_input != st.session_state.search_query:
+        print(f"DEBUG search: updating search_query from '{st.session_state.search_query}' to '{current_search_input}'")
         st.session_state.search_query = current_search_input
         st.rerun()
 
@@ -279,7 +281,7 @@ def main():
                 st.rerun()
             show_data_collection_popup(save_user, cancel_user, lang=lang)
         else:
-            create_grid_view(categories, on_category_click, search_query=st.session_state.search_query, search_fn=supabase.search_categories, page_key="categories")
+            create_grid_view(categories, on_category_click, search_query=st.session_state.search_query, search_fn=lambda q: supabase.search_categories(q, categories), page_key="categories")
     elif st.session_state.current_page == "streets":
         if not streets:
             st.warning("No street numbers found in Supabase.")
@@ -291,7 +293,7 @@ def main():
             if "header_search_input" in st.session_state:
                 del st.session_state["header_search_input"]
             st.rerun()  # <-- This line is necessary for immediate navigation
-        create_grid_view(streets, on_street_click, search_query=st.session_state.search_query, search_fn=supabase.search_street_numbers, page_key="streets")
+        create_grid_view(streets, on_street_click, search_query=st.session_state.search_query, search_fn=lambda q: supabase.search_street_numbers(q, streets), page_key="streets")
     elif st.session_state.current_page == "summary":
         user = st.session_state.user_data
         category = st.session_state.selected_category
