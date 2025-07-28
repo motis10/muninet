@@ -151,6 +151,10 @@ def main():
                         if user_data:
                             # User has data, go directly to summary
                             st.session_state.current_page = "summary"
+                            # Clear search when navigating to summary
+                            st.session_state.search_query = ""
+                            if "header_search_input" in st.session_state:
+                                del st.session_state["header_search_input"]
                         else:
                             # User needs to fill personal data first
                             st.session_state.current_page = "categories"
@@ -189,11 +193,14 @@ def main():
         # This function is called when search input changes
         pass  # Real-time search is handled below
 
+    # Hide search on summary page, show on categories and streets pages
+    show_search = st.session_state.current_page in ["categories", "streets"]
+    
     render_header(
         current_language=lang,
         on_language_change=on_language_change,
-        search_query=st.session_state.search_query,  # Pass current search query for proper clearing
-        on_search=on_search
+        search_query=st.session_state.search_query if show_search else None,
+        on_search=on_search if show_search else None
     )
 
     # Real-time search: Check if search input has changed and update immediately
@@ -254,6 +261,10 @@ def main():
                     # Both are selected, go directly to summary
                     print("DEBUG save_user: Both category and street selected, going to summary")
                     st.session_state.current_page = "summary"
+                    # Clear search when navigating to summary
+                    st.session_state.search_query = ""
+                    if "header_search_input" in st.session_state:
+                        del st.session_state["header_search_input"]
                 else:
                     # Need to select street, go to streets page
                     print("DEBUG save_user: Missing street, going to streets page")
