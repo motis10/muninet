@@ -1,20 +1,20 @@
 {
   "common": {
     "welcome": "Добро пожаловать",
-    "search": "Search",
-    "save": "Save",
+    "search": "Поиск",
+    "save": "Сохранить",
     "send": "Отправить",
-    "one_time": "Fill it one time only the city will call you in 24 hours",
-    "cancel": "Cancel",
-    "start_over": "Start Over",
-    "try_again": "Try Again",
-    "ticket_history": "Ticket History"
+    "one_time": "Заполните один раз, муниципалитет вам перезвонит",
+    "cancel": "Отмена",
+    "start_over": "Начать сначала",
+    "try_again": "Попробовать снова",
+    "ticket_history": "История заявок"
   },
   "forms": {
     "first_name": "Имя (Необязательно)",
     "last_name": "Фамилия (Необязательно)",
-    "id": "Номер удостоверения",
-    "id_optional": "Номер удостоверения (Необязательно)",
+    "id": "Номер удостоверения личности",
+    "id_optional": "Номер удостоверения личности (Необязательно)",
     "phone": "Номер телефона",
     "email": "Email (Необязательно)",
     "category": "Категория",
@@ -22,25 +22,33 @@
     "text": "Текст жалобы"
   },
   "messages": {
-    "success_message": "Your request has been submitted successfully. Ticket number: {ticket_number}",
-    "error_message": "Failed, please try again",
-    "save_locally": "Your data will be saved locally only"
+    "success_message": "Ваша заявка была успешно отправлена. Номер заявки: {ticket_number}",
+    "error_message": "Ошибка, пожалуйста попробуйте снова",
+    "save_locally": "Ваши данные будут сохранены только локально"
   },
   "validation": {
-    "first_name": "Имя обязательно и должно быть не более 35 символов.",
-    "last_name": "Фамилия обязательна и должна быть не более 35 символов.",
-    "user_id": "ID должен быть числом и содержать до 12 цифр.",
-    "phone": "Неверный номер телефона.",
-    "email": "Invalid email format."
+    "first_name": "Имя обязательно и должно содержать от 3 до 35 символов",
+    "last_name": "Фамилия обязательна и должна содержать от 3 до 35 символов",
+    "user_id": "Неверный номер удостоверения личности",
+    "phone": "Неверный номер телефона",
+    "email": "Неверный формат email"
+  },
+  "api_error": {
+    "network": "Ошибка сети: Пожалуйста, проверьте ваше соединение",
+    "timeout": "Превышено время ожидания. Пожалуйста, попробуйте снова",
+    "generic": "Произошла ошибка при связи с сервером"
+  },
+  "database_error": {
+    "generic": "Произошла ошибка базы данных. Пожалуйста, попробуйте позже"
   },
   "success": {
     "new_ticket": "Новая заявка",
     "back_home": "Вернуться на главную",
     "share_neighbor": "Поделиться с соседом",
     "ticket_number": "Номер заявки",
-    "title": "Успех",
-    "message": "Ваша заявка была успешно отправлена.",
-    "share_neighbor_text": "Помогите мне пожаловаться"
+    "title": "Новая заявка создана",
+    "message": "Ваша заявка была успешно отправлена",
+    "share_neighbor_text": "Помогите мне пожаловаться на это"
   },
   "errors": {
     "submission_failed": "Ошибка отправки заявки"

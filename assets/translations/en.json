@@ -4,7 +4,7 @@
     "search": "Search",
     "save": "Save",
     "send": "Send",
-    "one_time": "Fill it one time only the city will call you",
+    "one_time": "Fill once only, the municipality will call you back",
     "cancel": "Cancel",
     "start_over": "Start Over",
     "try_again": "Try Again",
@@ -19,7 +19,7 @@
     "email": "Email (Optional)",
     "category": "Category",
     "street": "Street",
-    "text": "Complain Text"
+    "text": "Complaint Text"
   },
   "messages": {
     "success_message": "Your request has been submitted successfully. Ticket number: {ticket_number}",
@@ -27,28 +27,28 @@
     "save_locally": "Your data will be saved locally only"
   },
   "validation": {
-    "first_name": "First name is required and must be 35 characters or less.",
-    "last_name": "Last name is required and must be 35 characters or less.",
-    "user_id": "ID must be numeric and up to 12 digits.",
-    "phone": "Invalid phone number.",
-    "email": "Invalid email format."
+    "first_name": "First name is required and must be between 3 and 35 characters",
+    "last_name": "Last name is required and must be between 3 and 35 characters",
+    "user_id": "Invalid ID number",
+    "phone": "Invalid phone number",
+    "email": "Invalid email format"
   },
   "api_error": {
-    "network": "Network error: Please check your connection.",
-    "timeout": "Request timed out. Please try again.",
-    "generic": "An error occurred while communicating with the server."
+    "network": "Network error: Please check your connection",
+    "timeout": "Request timed out. Please try again",
+    "generic": "An error occurred while communicating with the server"
   },
   "database_error": {
-    "generic": "A database error occurred. Please try again later."
+    "generic": "A database error occurred. Please try again later"
   },
   "success": {
     "new_ticket": "New Ticket",
     "back_home": "Back to Home",
     "share_neighbor": "Share with Neighbor",
     "ticket_number": "Ticket Number",
-    "title": "Success",
-    "message": "Your request has been submitted successfully.",
-    "share_neighbor_text": "Help me to complain about it"
+    "title": "New Ticket Created",
+    "message": "Your request has been submitted successfully",
+    "share_neighbor_text": "Help me complain about this"
   },
   "errors": {
     "submission_failed": "Request submission failed"

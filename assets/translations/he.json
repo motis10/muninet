@@ -1,10 +1,10 @@
 {
   "common": {
-    "welcome": "לשום",
+    "welcome": "ברוכים הבאים",
     "search": "חיפוש",
     "save": "שמור",
     "send": "שלח",
-    "one_time": "יש למלא פעם אחת בלבד העיריה חוזרת טלפונית ",
+    "one_time": "יש למלא פעם אחת בלבד העיריה חוזרת טלפונית",
     "cancel": "ביטול",
     "start_over": "התחל מחדש",
     "try_again": "נסה שנית",
@@ -22,16 +22,24 @@
     "text": "תלונה"
   },
   "messages": {
-    "success_message": "Your request has been submitted successfully. Ticket number: {ticket_number}",
-    "error_message": "Failed, please try again",
-    "save_locally": "Your data will be saved locally only"
+    "success_message": "הבקשה נשלחה בהצלחה. מספר קריאה: {ticket_number}",
+    "error_message": "נכשל, אנא נסה שוב",
+    "save_locally": "הנתונים יישמרו מקומית בלבד"
   },
   "validation": {
-    "first_name": "שם פרטי נדרש וחייב להיות בין 3 ל-35 תווים.",
-    "last_name": "שם משפחה נדרש וחייב להיות בין 3 ל-35 תווים.",
-    "user_id": "מספר זהות שגוי.",
-    "phone": "מספר טלפון שגוי.",
-    "email": "Invalid email format."
+    "first_name": "שם פרטי נדרש וחייב להיות בין 3 ל-35 תווים",
+    "last_name": "שם משפחה נדרש וחייב להיות בין 3 ל-35 תווים",
+    "user_id": "מספר זהות שגוי",
+    "phone": "מספר טלפון שגוי",
+    "email": "פורמט דוא\"ל לא תקין"
+  },
+  "api_error": {
+    "network": "שגיאת רשת: אנא בדוק את החיבור שלך",
+    "timeout": "הבקשה נכשלה בזמן חיבור. אנא נסה שוב",
+    "generic": "אירעה שגיאה בתקשורת עם השרת"
+  },
+  "database_error": {
+    "generic": "אירעה שגיאת מסד נתונים. אנא נסה שוב מאוחר יותר"
   },
   "success": {
     "new_ticket": "פתח קריאה חדשה",
@@ -39,7 +47,7 @@
     "share_neighbor": "שתף עם שכן",
     "ticket_number": "מס קריאה",
     "title": "נפתחה קריאה חדשה",
-    "message": "הבקשה שלך נשלחה בהצלחה.",
+    "message": "הבקשה שלך נשלחה בהצלחה",
     "share_neighbor_text": "תעזור לי להתלונן על זה"
   },
   "errors": {

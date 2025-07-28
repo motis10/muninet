@@ -1,14 +1,14 @@
 {
   "common": {
-    "welcome": "Welcome",
-    "search": "Search",
-    "save": "Save",
+    "welcome": "Bienvenue",
+    "search": "Rechercher",
+    "save": "Enregistrer",
     "send": "Envoyer",
-    "one_time": "Fill it one time only the city will call you",
-    "cancel": "Cancel",
-    "start_over": "Start Over",
-    "try_again": "Try Again",
-    "ticket_history": "Ticket History"
+    "one_time": "À remplir une seule fois, la municipalité vous rappellera",
+    "cancel": "Annuler",
+    "start_over": "Recommencer",
+    "try_again": "Réessayer",
+    "ticket_history": "Historique des tickets"
   },
   "forms": {
     "first_name": "Prénom (Optionnel)",
@@ -22,25 +22,33 @@
     "text": "Texte de plainte"
   },
   "messages": {
-    "success_message": "Your request has been submitted successfully. Ticket number: {ticket_number}",
-    "error_message": "Failed, please try again",
-    "save_locally": "Your data will be saved locally only"
+    "success_message": "Votre demande a été soumise avec succès. Numéro de ticket: {ticket_number}",
+    "error_message": "Échec, veuillez réessayer",
+    "save_locally": "Vos données seront sauvegardées localement uniquement"
   },
   "validation": {
-    "first_name": "Le prénom est requis et doit contenir entre 3 et 35 caractères.",
-    "last_name": "Le nom de famille est requis et doit contenir entre 3 et 35 caractères.",
-    "user_id": "L'identifiant doit être numérique et comporter jusqu'à 12 chiffres.",
-    "phone": "Le numéro de téléphone est invalide.",
-    "email": "Invalid email format."
-  }, 
+    "first_name": "Le prénom est requis et doit contenir entre 3 et 35 caractères",
+    "last_name": "Le nom de famille est requis et doit contenir entre 3 et 35 caractères",
+    "user_id": "Numéro d'identité invalide",
+    "phone": "Numéro de téléphone invalide",
+    "email": "Format d'email invalide"
+  },
+  "api_error": {
+    "network": "Erreur réseau : Veuillez vérifier votre connexion",
+    "timeout": "Délai d'attente dépassé. Veuillez réessayer",
+    "generic": "Une erreur s'est produite lors de la communication avec le serveur"
+  },
+  "database_error": {
+    "generic": "Une erreur de base de données s'est produite. Veuillez réessayer plus tard"
+  },
   "success": {
     "new_ticket": "Nouveau ticket",
     "back_home": "Retour à l'accueil",
     "share_neighbor": "Partager avec un voisin",
     "ticket_number": "Numéro de ticket",
-    "title": "Succès",
-    "message": "Votre demande a été soumise avec succès.",
-    "share_neighbor_text": "Aidez-moi à plaindre"
+    "title": "Nouveau ticket créé",
+    "message": "Votre demande a été soumise avec succès",
+    "share_neighbor_text": "Aidez-moi à me plaindre de cela"
   },
   "errors": {
     "submission_failed": "Échec de la soumission de la demande"
