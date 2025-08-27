@@ -32,7 +32,8 @@ def get_fallback_translations(lang):
                 "send": "שלח",
                 "cancel": "ביטול",
                 "one_time": "יש למלא פעם אחת בלבד העיריה חוזרת טלפונית",
-                "ticket_history": "היסטוריית תקלות"
+                "ticket_history": "היסטוריית תקלות",
+                "anonymous_ticket": "פתיחה אנונימית של דיווח על מפגע ואכיפה לעיריה"
             },
             "forms": {
                 "first_name": "שם פרטי פיקטיבי (לא חובה)",
@@ -64,7 +65,8 @@ def get_fallback_translations(lang):
                 "send": "Send",
                 "cancel": "Cancel",
                 "one_time": "Fill it one time only the city will call you",
-                "ticket_history": "Ticket History"
+                "ticket_history": "Ticket History",
+                "anonymous_ticket": "Anonymous reporting of nuisances and enforcement to the municipality"
             },
             "forms": {
                 "first_name": "First Name (Optional)",
@@ -96,7 +98,8 @@ def get_fallback_translations(lang):
                 "send": "Envoyer",
                 "cancel": "Annuler",
                 "one_time": "Remplir une seule fois la ville vous appellera",
-                "ticket_history": "Historique des tickets"
+                "ticket_history": "Historique des tickets",
+                "anonymous_ticket": "Signalement anonyme de nuisances et d'application à la municipalité"
             },
             "forms": {
                 "first_name": "Prénom (Optionnel)",
@@ -128,7 +131,8 @@ def get_fallback_translations(lang):
                 "send": "Отправить",
                 "cancel": "Отмена",
                 "one_time": "Заполните только один раз город вам перезвонит",
-                "ticket_history": "История заявок"
+                "ticket_history": "История заявок",
+                "anonymous_ticket": "Анонимное сообщение о нарушениях и правоприменении в муниципалитет"
             },
             "forms": {
                 "first_name": "Имя (Необязательно)",
