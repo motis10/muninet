@@ -172,6 +172,21 @@ window.onload = function() {{
 }};
 </script>
 """, height=140)
+    
+    # Anonymous ticket text paragraph
+    st.markdown(
+        f"""
+        <div style="text-align: center; margin: 1rem 0; padding: 0.8rem; 
+                    background-color: #f8f9fa; border-radius: 8px; 
+                    border-left: 4px solid #007bff;">
+            <p style="margin: 0; font-size: 1.1rem; color: #495057; font-weight: 500;">
+                {t('common.anonymous_ticket', current_language)}
+            </p>
+        </div>
+        """, 
+        unsafe_allow_html=True
+    )
+    
     # 3. Search box (simple and compact)
     if search_query is not None and on_search is not None:
         st.markdown('<div class="header-search-row">', unsafe_allow_html=True)

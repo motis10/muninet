@@ -8,7 +8,8 @@
     "cancel": "ביטול",
     "start_over": "התחל מחדש",
     "try_again": "נסה שנית",
-    "ticket_history": "היסטוריית תקלות"
+    "ticket_history": "היסטוריית תקלות",
+    "anonymous_ticket": "פתיחה אנונימית של דיווח על מפגע ואכיפה לעיריה"
   },
   "forms": {
     "first_name": "שם פרטי פיקטיבי (לא חובה)",

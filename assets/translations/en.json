@@ -8,7 +8,8 @@
     "cancel": "Cancel",
     "start_over": "Start Over",
     "try_again": "Try Again",
-    "ticket_history": "Ticket History"
+    "ticket_history": "Ticket History",
+    "anonymous_ticket": "Anonymous reporting of nuisances and enforcement to the municipality"
   },
   "forms": {
     "first_name": "First Name (Optional)",
