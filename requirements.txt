@@ -10,4 +10,4 @@ streamlit-local-storage
 brotli
 streamlit-image-gallery-enhanced>=1.0.1
 Flask
-beautifulsoup4
+streamlit-google-analytics-tag

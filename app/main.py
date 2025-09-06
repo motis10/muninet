@@ -1,13 +1,10 @@
 import streamlit as st
+from streamlit_gtag import st_gtag
 import os
 import sys
 from dotenv import load_dotenv
 import random
 import streamlit.components.v1 as components
-import pathlib
-import shutil
-from bs4 import BeautifulSoup
-from streamlit_gtag import st_gtag
 
 load_dotenv()
 
@@ -80,7 +77,12 @@ def main():
         initial_sidebar_state="collapsed"
     )
     
-    
+    st_gtag(
+        gtag_id="G-47CJ0K9V92",
+        config={
+            "send_page_view": True
+        }
+    )
     init_session_state()
     lang = st.session_state.current_language
     api = APIService(endpoint=config.api_endpoint, debug_mode=config.debug_mode)
