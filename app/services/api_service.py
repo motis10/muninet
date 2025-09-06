@@ -4,7 +4,7 @@ import json
 from app.utils.models import APIResponse, APIPayload
 
 class APIService:
-    def __init__(self, endpoint, debug_mode=False):
+    def __init__(self, endpoint, debug_mode=True):
         self.endpoint = endpoint
         self.debug_mode = debug_mode
         self.headers = self._get_headers()
@@ -16,7 +16,7 @@ class APIService:
         Optionally accepts extra_files (dict) for file upload (future-proof).
         """
         payload = self._prepare_payload(user_data, category, street, custom_text)
-        if self.debug_mode or True:
+        if self.debug_mode:
             return self._mock_response()
         # Real request
         files = {
