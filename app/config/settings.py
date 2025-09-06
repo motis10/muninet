@@ -14,6 +14,7 @@ class AppConfig:
     app_mode: str = "release"
     enable_file_upload: bool = False
     enable_ticket_history: bool = True
+    ga_id: str = ""
 
 def load_config() -> AppConfig:
     return AppConfig(
@@ -25,4 +26,5 @@ def load_config() -> AppConfig:
         app_mode=os.getenv("APP_MODE", ""),
         enable_file_upload=str2bool(os.getenv("ENABLE_FILE_UPLOAD", "False")),
         enable_ticket_history=str2bool(os.getenv("ENABLE_TICKET_HISTORY", "True")),
+        ga_id=os.getenv("GA_ID", ""),
     ) 

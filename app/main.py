@@ -77,19 +77,16 @@ def main():
         initial_sidebar_state="collapsed"
     )
     
-    # st_gtag(
-    #     gtag_id="G-47CJ0K9V92",
-    #     config={
-    #         "send_page_view": True
-    #     }
-    # )
-    # st_gtag(
-    #     event="custom_event",
-    #     parameters={
-    #         "event_category": "engagement",
-    #         "event_label": "button_click"
-    #     }
-    # )
+    st_gtag(
+        key="gtag_send_event_a",
+        id=config.ga_id,
+        event_name="app_main_page",
+        params={
+            "event_category": "send_page_view",
+            "event_label": "send_page_view",
+            "value": 1,
+        }
+    )
 
     init_session_state()
     lang = st.session_state.current_language
@@ -216,7 +213,16 @@ def main():
             print(f"DEBUG: Category clicked: {category.name}")
             print(f"DEBUG: Current user_data: {st.session_state.user_data}")
             print(f"DEBUG: Current selected_street: {st.session_state.selected_street}")
-            
+            st_gtag(
+                key="gtag_send_event_b",
+                id=config.ga_id,
+                event_name="custom_event",
+                params={
+                    "event_category": "category_click",
+                    "event_label": category.name,
+                    "value": 1,
+                }
+            )
             st.session_state.selected_category = category
             # Clear selected street when selecting a new category
             st.session_state.selected_street = None
@@ -292,6 +298,16 @@ def main():
         if not streets:
             st.warning("No street numbers found in Supabase.")
         def on_street_click(street):
+            st_gtag(
+                key="gtag_send_event_c",
+                id=config.ga_id,
+                event_name="custom_event",
+                params={
+                    "event_category": "category_click",
+                    "event_label": street.id,
+                    "value": 1,
+                }
+            )
             st.session_state.selected_street = street
             st.session_state.current_page = "summary"
             # Clear search when moving to summary
