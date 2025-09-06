@@ -232,7 +232,7 @@ def main():
                 "event_name": "custom_event",
                 "params": {
                     "event_category": "category_clicked",
-                    "event_label": "category_"+category.name,
+                    "event_label": "category_"+str(category.id),
                     "value": 1,
                 }
             })
