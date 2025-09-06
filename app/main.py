@@ -258,6 +258,17 @@ def main():
                 st.rerun()
         if st.session_state.show_popup:
             def save_user(user):
+                st.session_state.pending_gtag_events.append({
+                    "key": "gtag_send_event_b",
+                    "id": config.ga_id,
+                    "event_name": "custom_event",
+                    "params": {
+                        "event_category": "save_user",
+                        "event_label": "save",
+                        "value": 1,
+                    }
+                })
+
                 st.session_state.user_data = user
                 storage.save_user_data(user)
                 st.session_state.show_popup = False
@@ -296,6 +307,17 @@ def main():
                 st.rerun()
 
             def cancel_user():
+                st.session_state.pending_gtag_events.append({
+                    "key": "gtag_send_event_b",
+                    "id": config.ga_id,
+                    "event_name": "custom_event",
+                    "params": {
+                        "event_category": "cancel_user",
+                        "event_label": "cancel",
+                        "value": 1,
+                    }
+                })
+
                 st.session_state.show_popup = False
                 st.session_state.selected_category = None
                 st.session_state.custom_text = ""
@@ -331,6 +353,17 @@ def main():
             st.rerun()  # <-- This line is necessary for immediate navigation
         create_grid_view(streets, on_street_click, search_query=st.session_state.search_query, search_fn=lambda q: supabase.search_street_numbers(q, streets), page_key="streets")
     elif st.session_state.current_page == "summary":
+        st.session_state.pending_gtag_events.append({
+            "key": "gtag_send_event_b",
+            "id": config.ga_id,
+            "event_name": "custom_event",
+            "params": {
+                "event_category": "summary_page_view",
+                "event_label": "",
+                "value": 1,
+            }
+        })
+
         user = st.session_state.user_data
         category = st.session_state.selected_category
         street = st.session_state.selected_street
@@ -376,6 +409,16 @@ def main():
         # Future-proof: file upload (disabled for now)
         # uploaded_file = st.file_uploader("Upload a file (optional, not sent yet)", disabled=True)
         if st.button(t('common.send', lang), type="primary"):
+            st.session_state.pending_gtag_events.append({
+                "key": "gtag_send_event_b",
+                "id": config.ga_id,
+                "event_name": "custom_event",
+                "params": {
+                    "event_category": "summary_page_send_button",
+                    "event_label": "send_clicked",
+                    "value": 1,
+                }
+            })
             # To enable file upload in the future, pass extra_files to api.submit_data
             extra_files = None
             # if uploaded_file:
@@ -396,7 +439,16 @@ def main():
                 st.error(f"❌ {t('errors.submission_failed', lang)}: {response.ResultMessage}")
 
     elif st.session_state.current_page == "success":
-        
+        st.session_state.pending_gtag_events.append({
+            "key": "gtag_send_event_b",
+            "id": config.ga_id,
+            "event_name": "custom_event",
+            "params": {
+                "event_category": "ticket_sent_status",
+                "event_label": "success",
+                "value": 1,
+            }
+        })
         # Get ticket info from session state
         ticket_number = st.session_state.get('last_ticket_number')
         user_data = st.session_state.get('user_data')
@@ -429,6 +481,17 @@ def main():
         
         with col1:
             if st.button(t('success.new_ticket', lang), type="primary", use_container_width=True):
+                st.session_state.pending_gtag_events.append({
+                    "key": "gtag_send_event_b",
+                    "id": config.ga_id,
+                    "event_name": "custom_event",
+                    "params": {
+                        "event_category": "ticket_sent",
+                        "event_label": "new_ticket",
+                        "value": 1,
+                    }
+                })
+
                 # Clear session state and start over
                 for key in ['user_data', 'selected_category', 'selected_street', 'last_ticket_number', 'custom_text']:
                     if key in st.session_state:
@@ -437,6 +500,17 @@ def main():
                 st.rerun()
                 
         with col3:
+            st.session_state.pending_gtag_events.append({
+                "key": "gtag_send_event_b",
+                "id": config.ga_id,
+                "event_name": "custom_event",
+                "params": {
+                    "event_category": "ticket_sent",
+                    "event_label": "share_whatsapp",
+                    "value": 1,
+                }
+            })
+
             # Create WhatsApp share URL
             category_id = category_data.id if category_data else ""
             street_id = street_data.id if street_data else ""
@@ -451,6 +525,18 @@ def main():
                 whatsapp_url, 
                 use_container_width=True
             )
+    else:
+        st.session_state.pending_gtag_events.append({
+            "key": "gtag_send_event_b",
+            "id": config.ga_id,
+            "event_name": "custom_event",
+            "params": {
+                "event_category": "ticket_sent_status",
+                "event_label": "failed",
+                "value": 1,
+            }
+        })
+
 
 if __name__ == "__main__":
     main()
