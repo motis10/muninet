@@ -218,8 +218,8 @@ def main():
                 id=config.ga_id,
                 event_name="custom_event",
                 params={
-                    "event_category": "category_click",
-                    "event_label": category.name,
+                    "event_category": "category_clicked",
+                    "event_label": "category_"+category.name,
                     "value": 1,
                 }
             )
@@ -303,8 +303,8 @@ def main():
                 id=config.ga_id,
                 event_name="custom_event",
                 params={
-                    "event_category": "category_click",
-                    "event_label": street.id,
+                    "event_category": "category_clicked",
+                    "event_label": "street_" + street.id,
                     "value": 1,
                 }
             )
