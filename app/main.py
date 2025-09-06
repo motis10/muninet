@@ -259,7 +259,7 @@ def main():
         if st.session_state.show_popup:
             def save_user(user):
                 st.session_state.pending_gtag_events.append({
-                    "key": "gtag_send_event_b",
+                    "key": "gtag_send_event_c",
                     "id": config.ga_id,
                     "event_name": "custom_event",
                     "params": {
@@ -308,7 +308,7 @@ def main():
 
             def cancel_user():
                 st.session_state.pending_gtag_events.append({
-                    "key": "gtag_send_event_b",
+                    "key": "gtag_send_event_d",
                     "id": config.ga_id,
                     "event_name": "custom_event",
                     "params": {
@@ -354,7 +354,7 @@ def main():
         create_grid_view(streets, on_street_click, search_query=st.session_state.search_query, search_fn=lambda q: supabase.search_street_numbers(q, streets), page_key="streets")
     elif st.session_state.current_page == "summary":
         st.session_state.pending_gtag_events.append({
-            "key": "gtag_send_event_b",
+            "key": "gtag_send_event_e",
             "id": config.ga_id,
             "event_name": "custom_event",
             "params": {
@@ -410,7 +410,7 @@ def main():
         # uploaded_file = st.file_uploader("Upload a file (optional, not sent yet)", disabled=True)
         if st.button(t('common.send', lang), type="primary"):
             st.session_state.pending_gtag_events.append({
-                "key": "gtag_send_event_b",
+                "key": "f",
                 "id": config.ga_id,
                 "event_name": "custom_event",
                 "params": {
@@ -440,7 +440,7 @@ def main():
 
     elif st.session_state.current_page == "success":
         st.session_state.pending_gtag_events.append({
-            "key": "gtag_send_event_b",
+            "key": "gtag_send_event_g",
             "id": config.ga_id,
             "event_name": "custom_event",
             "params": {
@@ -482,7 +482,7 @@ def main():
         with col1:
             if st.button(t('success.new_ticket', lang), type="primary", use_container_width=True):
                 st.session_state.pending_gtag_events.append({
-                    "key": "gtag_send_event_b",
+                    "key": "gtag_send_event_h",
                     "id": config.ga_id,
                     "event_name": "custom_event",
                     "params": {
@@ -501,7 +501,7 @@ def main():
                 
         with col3:
             st.session_state.pending_gtag_events.append({
-                "key": "gtag_send_event_b",
+                "key": "gtag_send_event_i",
                 "id": config.ga_id,
                 "event_name": "custom_event",
                 "params": {
@@ -527,7 +527,7 @@ def main():
             )
     else:
         st.session_state.pending_gtag_events.append({
-            "key": "gtag_send_event_b",
+            "key": "gtag_send_event_j",
             "id": config.ga_id,
             "event_name": "custom_event",
             "params": {
