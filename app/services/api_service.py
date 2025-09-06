@@ -35,6 +35,7 @@ class APIService:
             try:
                 auto_text = resp.text
                 print(f"✅ Automatic requests decompression: {len(auto_text)} chars")
+                print(f"✅ response: {auto_text}")
                 if auto_text.strip().startswith('{'):
                     print("✅ Looks like JSON!")
                     try:
