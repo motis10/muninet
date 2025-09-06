@@ -77,6 +77,20 @@ def main():
         initial_sidebar_state="collapsed"
     )
     
+    init_session_state()
+    
+    # Initialize pending gtag events list
+    if "pending_gtag_events" not in st.session_state:
+        st.session_state.pending_gtag_events = []
+    
+    # Send any pending gtag events from previous runs
+    if config.ga_id and st.session_state.pending_gtag_events:
+        for event in st.session_state.pending_gtag_events:
+            print(f"DEBUG: Sending gtag event: {event}")
+            st_gtag(**event)
+        st.session_state.pending_gtag_events = []
+    
+    # Initialize Google Analytics page view only once
     st_gtag(
         key="gtag_send_event_a",
         id=config.ga_id,
@@ -87,8 +101,6 @@ def main():
             "value": 1,
         }
     )
-
-    init_session_state()
     lang = st.session_state.current_language
     api = APIService(endpoint=config.api_endpoint, debug_mode=config.debug_mode)
     supabase = SupabaseService(config.supabase_url, config.supabase_key)
@@ -213,16 +225,17 @@ def main():
             print(f"DEBUG: Category clicked: {category.name}")
             print(f"DEBUG: Current user_data: {st.session_state.user_data}")
             print(f"DEBUG: Current selected_street: {st.session_state.selected_street}")
-            st_gtag(
-                key="gtag_send_event_b",
-                id=config.ga_id,
-                event_name="custom_event",
-                params={
+            # Queue gtag event for next run (before st.rerun)
+            st.session_state.pending_gtag_events.append({
+                "key": "gtag_send_event_b",
+                "id": config.ga_id,
+                "event_name": "custom_event",
+                "params": {
                     "event_category": "category_clicked",
                     "event_label": "category_"+category.name,
                     "value": 1,
                 }
-            )
+            })
             st.session_state.selected_category = category
             # Clear selected street when selecting a new category
             st.session_state.selected_street = None
@@ -298,16 +311,17 @@ def main():
         if not streets:
             st.warning("No street numbers found in Supabase.")
         def on_street_click(street):
-            st_gtag(
-                key="gtag_send_event_c",
-                id=config.ga_id,
-                event_name="custom_event",
-                params={
-                    "event_category": "category_clicked",
-                    "event_label": "street_" + street.id,
+            # Queue gtag event for next run (before st.rerun)
+            st.session_state.pending_gtag_events.append({
+                "key": "gtag_send_event_c",
+                "id": config.ga_id,
+                "event_name": "custom_event",
+                "params": {
+                    "event_category": "street_clicked", 
+                    "event_label": "street_" + str(street.id),
                     "value": 1,
                 }
-            )
+            })
             st.session_state.selected_street = street
             st.session_state.current_page = "summary"
             # Clear search when moving to summary
