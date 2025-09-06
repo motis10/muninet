@@ -20,7 +20,7 @@ class APIService:
         #     return self._mock_response()
         # Real request
         files = {
-            'json': (None, json.dumps(payload.__dict__), 'application/json')
+            'json': (None, json.dumps(payload.__dict__))
         }
         if extra_files:
             files.update(extra_files)
