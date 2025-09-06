@@ -82,11 +82,12 @@ class APIService:
         return {
             'Accept-Language': 'en-US,en;q=0.9',
             'X-Requested-With': 'XMLHttpRequest',
-            'User-Agent': 'Mozilla/5.0',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
             'Accept': 'application/json;odata=verbose',
             'Origin': 'https://www.netanya.muni.il',
             'Referer': 'https://www.netanya.muni.il/CityHall/ServicesInnovation/Pages/PublicComplaints.aspx',
-            'Accept-Encoding': 'gzip, deflate, br'
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Priority': 'u=1, i'
         }
 
     def _mock_response(self):
