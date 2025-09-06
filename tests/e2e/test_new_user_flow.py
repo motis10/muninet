@@ -19,7 +19,6 @@ class DummyAPIService(APIService):
             ResultCode = 200
             ResultStatus = "SUCCESS CREATE"
             data = "MOCK-0001"
-            ResultData = {"incidentNumber": "MOCK-0001"}
             ErrorDescription = ""
         return DummyResponse()
 

@@ -4,6 +4,9 @@ import sys
 from dotenv import load_dotenv
 import random
 import streamlit.components.v1 as components
+import pathlib
+import shutil
+from bs4 import BeautifulSoup
 
 load_dotenv()
 
@@ -40,6 +43,36 @@ except ImportError:
         st.error(f"Import error: {e}")
         st.stop()
 
+
+def inject_ga():
+    GA_ID = "google_analytics"
+
+    GA_JS = """
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G973RH74MN"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-G973RH74MN');
+    </script>
+    """
+
+    # Insert the script in the head tag of the static template inside your virtual
+    index_path = pathlib.Path(st.__file__).parent / "static" / "index.html"
+    # print(f'editing {index_path}')
+    soup = BeautifulSoup(index_path.read_text(), features="html.parser")
+    if not soup.find(id=GA_ID):  # if cannot find tag
+        bck_index = index_path.with_suffix('.bck')
+        if bck_index.exists():
+            shutil.copy(bck_index, index_path)  # recover from backup
+        else:
+            shutil.copy(index_path, bck_index)  # keep a backup
+        html = str(soup)
+        new_html = html.replace('<head>', '<head>\n' + GA_JS)
+        index_path.write_text(new_html)
+
+
 # --- Session state keys ---
 def init_session_state():
     # Initialize storage service for session state setup
@@ -68,33 +101,16 @@ def init_session_state():
 
 # --- Main app logic ---
 def main():
+    # Include Google Analytics tracking code
+    inject_ga()
+
     config = load_config()
     st.set_page_config(
         page_title="Netanya Municipality", 
         layout="centered",
         initial_sidebar_state="collapsed"
     )
-
-    # Include Google Analytics tracking code
-    if config.google_analytics_id:
-        try:
-            with open("google_analytics.html", "r") as f:
-                html_code = f.read()
-                # Replace the placeholder with actual tracking ID
-                html_code = html_code.replace("G-G973RH74MN", config.google_analytics_id)
-                components.html(html_code, height=0)
-        except FileNotFoundError:
-            # Fallback: create inline Google Analytics code
-            ga_code = f"""
-            <script async src="https://www.googletagmanager.com/gtag/js?id={config.google_analytics_id}"></script>
-            <script>
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){{dataLayer.push(arguments);}}
-              gtag('js', new Date());
-              gtag('config', '{config.google_analytics_id}');
-            </script>
-            """
-            components.html(ga_code, height=0)
+    
     
     init_session_state()
     lang = st.session_state.current_language
@@ -205,9 +221,9 @@ def main():
 
     # Real-time search: Check if search input has changed and update immediately
     current_search_input = st.session_state.get("header_search_input", "")
-    print(f"DEBUG search: current_search_input='{current_search_input}', session_search_query='{st.session_state.search_query}'")
+    # print(f"DEBUG search: current_search_input='{current_search_input}', session_search_query='{st.session_state.search_query}'")
     if current_search_input != st.session_state.search_query:
-        print(f"DEBUG search: updating search_query from '{st.session_state.search_query}' to '{current_search_input}'")
+        # print(f"DEBUG search: updating search_query from '{st.session_state.search_query}' to '{current_search_input}'")
         st.session_state.search_query = current_search_input
         st.rerun()
 

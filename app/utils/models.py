@@ -63,7 +63,6 @@ class APIResponse:
     ResultCode: int
     ErrorDescription: str
     ResultStatus: str
-    ResultData: Dict[str, Any]
     data: str
 
 @dataclass
