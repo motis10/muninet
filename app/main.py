@@ -77,12 +77,20 @@ def main():
         initial_sidebar_state="collapsed"
     )
     
-    st_gtag(
-        gtag_id="G-47CJ0K9V92",
-        config={
-            "send_page_view": True
-        }
-    )
+    # st_gtag(
+    #     gtag_id="G-47CJ0K9V92",
+    #     config={
+    #         "send_page_view": True
+    #     }
+    # )
+    # st_gtag(
+    #     event="custom_event",
+    #     parameters={
+    #         "event_category": "engagement",
+    #         "event_label": "button_click"
+    #     }
+    # )
+
     init_session_state()
     lang = st.session_state.current_language
     api = APIService(endpoint=config.api_endpoint, debug_mode=config.debug_mode)
