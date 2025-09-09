@@ -7,7 +7,6 @@ black
 python-dotenv
 typing-extensions 
 streamlit-local-storage
-brotli
 streamlit-image-gallery-enhanced>=1.0.1
 Flask
 streamlit-google-analytics-tag

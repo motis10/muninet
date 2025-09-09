@@ -1,6 +1,7 @@
 import requests
 import brotli
 import json
+import secrets
 from app.utils.models import APIResponse, APIPayload
 
 class APIService:
@@ -18,18 +19,30 @@ class APIService:
         payload = self._prepare_payload(user_data, category, street, custom_text)
         # if self.debug_mode:
         #     return self._mock_response()
-        # Real request
-        files = {
-            'json': (None, json.dumps(payload.__dict__))
-        }
-        if extra_files:
-            files.update(extra_files)
+        # Create multipart data with WebKit boundary
+        boundary = f"----WebKitFormBoundary{secrets.token_urlsafe(16)}"
+        json_data = json.dumps(payload.__dict__)
+        
+        # Build multipart body manually
+        body = f'--{boundary}\r\n'
+        body += 'Content-Disposition: form-data; name="json"\r\n'
+        body += '\r\n'
+        body += json_data
+        body += f'\r\n--{boundary}--\r\n'
+        
+        # Set headers manually
+        headers = self.headers.copy()
+        headers['Content-Type'] = f'multipart/form-data; boundary={boundary}'
+        
         try:
             print(f"DEBUG: Posting to {self.endpoint}")
-            print(f"DEBUG: Headers: {self.headers}")
-            print(f"DEBUG: Files payload: {files}")
+            print(f"DEBUG: Headers: {headers}")
+            print(f"DEBUG: Content-Type: {headers['Content-Type']}")
+            print("DEBUG: Request body:")
+            print(body)
+            print("=" * 50)
             
-            resp = requests.post(self.endpoint, files=files, headers=self.headers, timeout=30)
+            resp = requests.post(self.endpoint, data=body.encode('utf-8'), headers=headers, timeout=30)
             
             # 1. Try automatic requests decompression
             try:
