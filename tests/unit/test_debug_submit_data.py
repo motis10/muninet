@@ -52,10 +52,7 @@ def test_debug_submit_data():
     print(f"🔧 API Endpoint: {endpoint}")
     print(f"🔧 Debug Mode: {api.debug_mode}")
     print("=" * 50)
-    
-    # 🔴 SET BREAKPOINT HERE in your IDE to step through submit_data
-    breakpoint()  # This will pause execution for debugging
-    
+        
     print("🚀 Calling submit_data...")
     
     # Call submit_data with custom text
