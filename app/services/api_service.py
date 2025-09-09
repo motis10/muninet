@@ -1,5 +1,4 @@
 import requests
-import brotli
 import json
 import secrets
 from app.utils.models import APIResponse, APIPayload
@@ -17,8 +16,8 @@ class APIService:
         Optionally accepts extra_files (dict) for file upload (future-proof).
         """
         payload = self._prepare_payload(user_data, category, street, custom_text)
-        # if self.debug_mode:
-        #     return self._mock_response()
+        if self.debug_mode:
+            return self._mock_response()
         # Create multipart data with WebKit boundary
         boundary = f"----WebKitFormBoundary{secrets.token_urlsafe(16)}"
         json_data = json.dumps(payload.__dict__)
