@@ -436,7 +436,7 @@ def main():
                 st.session_state.current_page = "success"
                 st.rerun()
             else:
-                st.error(f"❌ {t('errors.submission_failed', lang)}: {response.ResultMessage}")
+                st.error(f"❌ {t('errors.submission_failed', lang)}: {response.ErrorDescription}")
 
     elif st.session_state.current_page == "success":
         st.session_state.pending_gtag_events.append({

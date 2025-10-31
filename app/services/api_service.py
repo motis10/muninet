@@ -1,105 +1,134 @@
 import requests
 import json
-import secrets
-from app.utils.models import APIResponse, APIPayload
+from app.utils.models import APIResponse
 
 class APIService:
-    def __init__(self, endpoint, debug_mode=True):
+    def __init__(self, endpoint, debug_mode):
         self.endpoint = endpoint
         self.debug_mode = debug_mode
-        self.headers = self._get_headers()
         
     def submit_data(self, user_data, category, street, custom_text=None, extra_files=None):
         """
-        Submit data to municipality API or mock service. Returns APIResponse.
+        Submit data to Cloud Run incident service. Returns APIResponse.
         Optionally accepts custom_text to override category.event_call_desc.
         Optionally accepts extra_files (dict) for file upload (future-proof).
         """
-        payload = self._prepare_payload(user_data, category, street, custom_text)
         if self.debug_mode:
             return self._mock_response()
-        # Create multipart data with WebKit boundary
-        boundary = f"----WebKitFormBoundary{secrets.token_urlsafe(16)}"
-        json_data = json.dumps(payload.__dict__)
+            
+        # Prepare JSON payload for new Cloud Run service
+        payload = self._prepare_json_payload(user_data, category, street, custom_text)
         
-        # Build multipart body manually
-        body = f'--{boundary}\r\n'
-        body += 'Content-Disposition: form-data; name="json"\r\n'
-        body += '\r\n'
-        body += json_data
-        body += f'\r\n--{boundary}--\r\n'
+        # Ensure endpoint has the correct path
+        submit_endpoint = self.endpoint
+        if not submit_endpoint.endswith('/incidents/submit'):
+            if submit_endpoint.endswith('/'):
+                submit_endpoint += 'incidents/submit'
+            else:
+                submit_endpoint += '/incidents/submit'
         
-        # Set headers manually
-        headers = self.headers.copy()
-        headers['Content-Type'] = f'multipart/form-data; boundary={boundary}'
+        headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
         
         try:
-            print(f"DEBUG: Posting to {self.endpoint}")
-            print(f"DEBUG: Headers: {headers}")
-            print(f"DEBUG: Content-Type: {headers['Content-Type']}")
-            print("DEBUG: Request body:")
-            print(body)
-            print("=" * 50)
+            print("=" * 60)
+            print("🚀 SENDING REQUEST TO CLOUD RUN SERVICE")
+            print("=" * 60)
+            print(f"📡 Endpoint: {submit_endpoint}")
+            print(f"🔧 Headers: {headers}")
+            print("📋 JSON Payload:")
+            print(json.dumps(payload, indent=2, ensure_ascii=False))
+            print("=" * 60)
             
-            resp = requests.post(self.endpoint, data=body.encode('utf-8'), headers=headers, timeout=30)
+            resp = requests.post(
+                submit_endpoint, 
+                json=payload, 
+                headers=headers, 
+                timeout=30
+            )
             
-            # 1. Try automatic requests decompression
-            try:
-                auto_text = resp.text
-                print(f"✅ Automatic requests decompression: {len(auto_text)} chars")
-                print(f"✅ response: {auto_text}")
-                if auto_text.strip().startswith('{'):
-                    print("✅ Looks like JSON!")
-                    try:
-                        json_data = json.loads(auto_text)
-                        print(f"✅ JSON parsed successfully: {json_data}")
-                        # Use this successful result
-                        return APIResponse(
-                            ResultCode=json_data.get('ResultCode'),
-                            ErrorDescription=json_data.get('ErrorDescription'),
-                            ResultStatus=json_data.get('ResultStatus'),
-                            data=json_data.get('data')
-                        )
-                    except Exception as json_e:
-                        print(f"❌ JSON parsing failed: {json_e}")
-            except Exception as e:
-                print(f"❌ Automatic decompression failed: {e}")
+            print("📨 RESPONSE RECEIVED")
+            print("=" * 60)
+            print(f"📊 Status Code: {resp.status_code}")
+            print(f"📋 Response Headers: {dict(resp.headers)}")
+            print(f"📄 Response Text: {resp.text}")
+            print("=" * 60)
+            
+            if resp.status_code == 200:
+                try:
+                    json_response = resp.json()
+                    print(f"✅ JSON response: {json_response}")
+                    
+                    # Transform Cloud Run response to expected APIResponse format
+                    return APIResponse(
+                        ResultCode=200,
+                        ErrorDescription="",
+                        ResultStatus="SUCCESS CREATE",
+                        data=json_response.get('ticket_id', 'UNKNOWN')
+                    )
+                except Exception as json_e:
+                    print(f"❌ JSON parsing failed: {json_e}")
+                    return APIResponse(
+                        ResultCode=500, 
+                        ErrorDescription=f"Invalid JSON response: {json_e}", 
+                        ResultStatus="ERROR", 
+                        data=""
+                    )
+            else:
+                # Handle error responses
+                try:
+                    error_response = resp.json()
+                    error_msg = error_response.get('detail', f'HTTP {resp.status_code}')
+                except:
+                    error_msg = f'HTTP {resp.status_code}: {resp.text}'
+                
+                return APIResponse(
+                    ResultCode=resp.status_code,
+                    ErrorDescription=error_msg,
+                    ResultStatus="ERROR",
+                    data=""
+                )
             
         except Exception as e:
-            print(f"DEBUG: Exception in submit_data: {e}")
+            print("=" * 60)
+            print("❌ REQUEST FAILED")
+            print("=" * 60)
+            print(f"🚨 Exception Type: {type(e).__name__}")
+            print(f"🚨 Exception Message: {str(e)}")
+            print("=" * 60)
             import traceback
             traceback.print_exc()
             return APIResponse(ResultCode=500, ErrorDescription=str(e), ResultStatus="ERROR", data="")
     
-    def _prepare_payload(self, user_data, category, street, custom_text=None):
+    def _prepare_json_payload(self, user_data, category, street, custom_text=None):
         """
-        Prepare API payload from user selections.
+        Prepare JSON payload for Cloud Run incident service.
         Uses custom_text if provided, otherwise falls back to category.event_call_desc.
         """
-        return APIPayload(
-            eventCallDesc=custom_text,
-            houseNumber=street.house_number,
-            callerFirstName=user_data.first_name,
-            callerLastName=user_data.last_name,
-            callerTZ=user_data.user_id,
-            callerPhone1=user_data.phone,
-            callerEmail=user_data.email or ""
-        )
-
-    def _get_headers(self):
-        """
-        Get required HTTP headers.
-        Note: Content-Type is automatically set by requests when using files parameter.
-        """
         return {
-            'Accept-Language': 'en-US,en;q=0.9',
-            'X-Requested-With': 'XMLHttpRequest',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
-            'Accept': 'application/json;odata=verbose',
-            'Origin': 'https://www.netanya.muni.il',
-            'Referer': 'https://www.netanya.muni.il/CityHall/ServicesInnovation/Pages/PublicComplaints.aspx',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Priority': 'u=1, i'
+            "user_data": {
+                "first_name": user_data.first_name,
+                "last_name": user_data.last_name,
+                "phone": user_data.phone,
+                "user_id": user_data.user_id,
+                "email": user_data.email or ""
+            },
+            "category": {
+                "id": category.id,
+                "name": category.name,
+                "text": category.text,
+                "image_url": category.image_url,
+                "event_call_desc": category.event_call_desc
+            },
+            "street": {
+                "id": street.id,
+                "name": street.name,
+                "image_url": street.image_url,
+                "house_number": street.house_number
+            },
+            "custom_text": custom_text or category.event_call_desc
         }
 
     def _mock_response(self):
